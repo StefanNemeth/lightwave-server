@@ -9,3 +9,9 @@ lazy val lightwaveService = Project(
 ).settings(Commons.settings: _*).settings(
   libraryDependencies ++= commonDependencies
 )
+
+// Room service
+lazy val lightwaveRooms = Project(
+  id = "lightwave-rooms",
+  base = file("lightwave-rooms")
+).settings(Commons.settings: _*).dependsOn(lightwaveService)
