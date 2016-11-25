@@ -7,9 +7,12 @@ object Commons {
     val scala = "2.11.7"
   }
 
-  val settings: Seq[Def.Setting[_]] = Seq(
+  val globalResources = file("resources")
+
+  val settings = Seq(
     version := Versions.lightwave,
     scalaVersion := Versions.scala,
-    resolvers += Opts.resolver.mavenLocalFile
+    resolvers += Opts.resolver.mavenLocalFile,
+    unmanagedResourceDirectories in Compile += globalResources
   )
 }

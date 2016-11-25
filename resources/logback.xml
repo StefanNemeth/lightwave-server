@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %highlight([%level]) [%X{akkaSource:-default}] %logger{30}: %m%n%rEx</pattern>
+        </encoder>
+    </appender>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <logger name="akka" level="WARN" />
+
+    <!-- Our code base !-->
+    <logger name="de.lightwave" level="DEBUG" />
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
