@@ -3,8 +3,8 @@ import Keys._
 
 object Commons {
   object Versions {
-    val lightwave = "0.0.1"
-    val scala = "2.11.7"
+    val lightwave = "0.1-SNAPSHOT"
+    val scala = "2.11.8"
   }
 
   val globalResources = file("resources")

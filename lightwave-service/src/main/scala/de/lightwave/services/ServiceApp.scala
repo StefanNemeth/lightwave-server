@@ -2,7 +2,7 @@ package de.lightwave.services
 
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.JavaConversions._
@@ -33,16 +33,15 @@ trait ServiceApp {
 
     cluster registerOnMemberUp {
       ServiceApp.Log.info(s"Service node up on '${cluster.selfAddress}'!")
-      onStart(system)
+      onStart(config, system)
     }
   }
 
   /**
     * To be defined by the service implementation.
     * It's called when the cluster is ready to go.
-    * @param system The current actor system
     */
-  def onStart(system: ActorSystem): Unit
+  def onStart(config: Config, system: ActorSystem): Unit
 }
 
 object ServiceApp {

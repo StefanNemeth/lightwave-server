@@ -1,0 +1,1 @@
+INSERT INTO `room` (id, name, description) VALUES (1, 'Test room', 'Test description')
