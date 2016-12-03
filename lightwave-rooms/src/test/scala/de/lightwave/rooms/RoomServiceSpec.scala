@@ -4,9 +4,10 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.RoomService.GetRoom
+import de.lightwave.rooms.model.Room
 import de.lightwave.rooms.repository.{RoomRepository, RoomRepositorySpec}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, OneInstancePerTest}
 
 import scala.concurrent.Future
 
@@ -15,14 +16,22 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
   with DefaultTimeout
   with ImplicitSender
   with BeforeAndAfterAll
+  with OneInstancePerTest
   with MockitoSugar {
 
   import org.mockito.Mockito._
 
-  test("Get room by id") {
+  test("Get room when trying to fetch existent room by id") {
     withActor() { service =>
       service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
       expectMsg(Some(RoomRepositorySpec.expectedRoom))
+    }
+  }
+
+  test("Get nothing when trying to fetch non-existent room by id") {
+    withActor() { service =>
+      service ! GetRoom(100)
+      expectMsg(None)
     }
   }
 
@@ -41,6 +50,38 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     reset(repMock)
 
     // Second fetch
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
+    verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id)
+
+    system.stop(service)
+  }
+
+  test("Cache room on first fetch with pre-cached rooms") {
+    val repMock = mock[RoomRepository]
+    val service = system.actorOf(RoomService.props(repMock))
+    val firstExpectedRoom = Room(2, "Test room", "Test description")
+
+    // First fetch of room 2
+    when(repMock.getById(firstExpectedRoom.id)).thenReturn(Future.successful(Some(
+      firstExpectedRoom
+    )))
+
+    service ! GetRoom(firstExpectedRoom.id)
+    expectMsg(Some(firstExpectedRoom))
+
+    reset(repMock)
+
+    // First fetch of room 1
+    when(repMock.getById(RoomRepositorySpec.expectedRoom.id)).thenReturn(Future.successful(Some(
+      RoomRepositorySpec.expectedRoom
+    )))
+
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
+    expectMsg(Some(RoomRepositorySpec.expectedRoom))
+
+    reset(repMock)
+
+    // Second fetch of room 1
     service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
     verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id)
   }
