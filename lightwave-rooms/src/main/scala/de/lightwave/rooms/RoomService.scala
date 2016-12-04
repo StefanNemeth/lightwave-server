@@ -55,7 +55,7 @@ object RoomService {
   case class PutInCache(id: RoomId, room: Room)
 
   // Use Postgres repository by default
-  def props() = Props(classOf[RoomService], RoomRepository)
+  def props(): Props = props(RoomRepository)
 
   def props(roomRepository: RoomRepository) = Props(classOf[RoomService], roomRepository)
 }
