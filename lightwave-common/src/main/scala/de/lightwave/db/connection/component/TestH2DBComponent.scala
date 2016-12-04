@@ -15,7 +15,7 @@ class TestH2DBComponent(scripts: Array[String]) extends DBComponent {
 
   val randomDB = "jdbc:h2:mem:test" + UUID.randomUUID().toString() + ";"
 
-  val h2Url = randomDB + "MODE=MySql;DATABASE_TO_UPPER=false;INIT=" +
+  val h2Url = randomDB + "MODE=PostgreSQL;DATABASE_TO_UPPER=false;INIT=" +
     scripts.map(script => s"runscript from '${script.replaceAll("'", "\\'")}'").mkString("\\;")
 
   override val db = Database.forURL(url = h2Url, driver = "org.h2.Driver")
