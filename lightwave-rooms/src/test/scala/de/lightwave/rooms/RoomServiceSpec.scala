@@ -23,7 +23,7 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
 
   test("Get room when trying to fetch existent room by id") {
     withActor() { service =>
-      service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
+      service ! GetRoom(RoomRepositorySpec.expectedRoom.id.get)
       expectMsg(Some(RoomRepositorySpec.expectedRoom))
     }
   }
@@ -40,18 +40,18 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     val service = system.actorOf(RoomService.props(repMock))
 
     // First fetch
-    when(repMock.getById(RoomRepositorySpec.expectedRoom.id)).thenReturn(Future.successful(Some(
+    when(repMock.getById(RoomRepositorySpec.expectedRoom.id.get)).thenReturn(Future.successful(Some(
       RoomRepositorySpec.expectedRoom
     )))
 
-    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id.get)
     expectMsg(Some(RoomRepositorySpec.expectedRoom))
 
     reset(repMock)
 
     // Second fetch
-    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
-    verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id)
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id.get)
+    verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id.get)
 
     system.stop(service)
   }
@@ -59,31 +59,31 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
   test("Cache room on first fetch with pre-cached rooms") {
     val repMock = mock[RoomRepository]
     val service = system.actorOf(RoomService.props(repMock))
-    val firstExpectedRoom = Room(2, "Test room", "Test description")
+    val firstExpectedRoom = Room(Some(2), "Test room", "Test description")
 
     // First fetch of room 2
-    when(repMock.getById(firstExpectedRoom.id)).thenReturn(Future.successful(Some(
+    when(repMock.getById(firstExpectedRoom.id.get)).thenReturn(Future.successful(Some(
       firstExpectedRoom
     )))
 
-    service ! GetRoom(firstExpectedRoom.id)
+    service ! GetRoom(firstExpectedRoom.id.get)
     expectMsg(Some(firstExpectedRoom))
 
     reset(repMock)
 
     // First fetch of room 1
-    when(repMock.getById(RoomRepositorySpec.expectedRoom.id)).thenReturn(Future.successful(Some(
+    when(repMock.getById(RoomRepositorySpec.expectedRoom.id.get)).thenReturn(Future.successful(Some(
       RoomRepositorySpec.expectedRoom
     )))
 
-    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id.get)
     expectMsg(Some(RoomRepositorySpec.expectedRoom))
 
     reset(repMock)
 
     // Second fetch of room 1
-    service ! GetRoom(RoomRepositorySpec.expectedRoom.id)
-    verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id)
+    service ! GetRoom(RoomRepositorySpec.expectedRoom.id.get)
+    verify(repMock, never).getById(RoomRepositorySpec.expectedRoom.id.get)
   }
 
   private def withActor()(testCode: ActorRef => Any): Unit = {

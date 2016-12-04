@@ -22,7 +22,7 @@ private[repository] trait RoomTable { this: DBComponent =>
     val id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     val name = column[String]("name")
     val description = column[String]("description")
-    def * = (id, name, description) <> (Room.tupled, Room.unapply)
+    def * = (id.?, name, description) <> (Room.tupled, Room.unapply)
   }
 
   protected val roomTableQuery = TableQuery[RoomTable]

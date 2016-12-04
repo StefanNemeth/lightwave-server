@@ -12,7 +12,7 @@ class RoomRepositorySpec extends FunSuite with ScalaFutures {
   val repository: RoomRepository = RoomRepositorySpec.getRepository()
 
   test("Get room by id") {
-    val room = repository.getById(RoomRepositorySpec.expectedRoom.id)
+    val room = repository.getById(RoomRepositorySpec.expectedRoom.id.get)
 
     whenReady(room) { room =>
       assert(room === Some(RoomRepositorySpec.expectedRoom))
@@ -25,5 +25,5 @@ object RoomRepositorySpec {
     "lightwave-rooms/src/test/resources/db/schema.sql", "lightwave-rooms/src/test/resources/db/schemadata.sql"
   )) with RoomRepository
 
-  val expectedRoom = Room(1, "Test room", "Test description")
+  val expectedRoom = Room(Some(1), "Test room", "Test description")
 }
