@@ -2,17 +2,21 @@ package de.lightwave.rooms.engine
 
 import java.util.UUID
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.cluster.sharding.ShardRegion
-import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized, SubscribeToRoom}
+import de.lightwave.rooms.engine.EngineComponent.Initialize
+import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
+import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.model.Room
 
-class RoomEngine extends Actor {
+class RoomEngine(mapCoordinatorProps: Props) extends Actor {
+  val mapCoordinator: ActorRef = context.actorOf(mapCoordinatorProps, "mapCoordinator")
 
   /**
     * Initialize all room engine services
     */
   def initialize(room: Room): Unit = {
+    mapCoordinator ! Initialize(room)
   }
 
   override def receive: Receive = initialReceive
@@ -30,7 +34,9 @@ class RoomEngine extends Actor {
 }
 
 object RoomEngine {
-  def props(): Props = Props[RoomEngine]()
+  def props(): Props = props(MapCoordinator.props())
+
+  def props(mapCoordinatorProps: Props) = Props(classOf[RoomEngine], mapCoordinatorProps)
 
   case class InitializeRoom(room: Room)
 
