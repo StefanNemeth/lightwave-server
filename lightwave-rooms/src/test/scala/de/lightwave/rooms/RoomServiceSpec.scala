@@ -59,7 +59,7 @@ class RoomServiceSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
   test("Cache room on first fetch with pre-cached rooms") {
     val repMock = mock[RoomRepository]
     val service = system.actorOf(RoomService.props(repMock))
-    val firstExpectedRoom = Room(Some(2), "Test room", "Test description")
+    val firstExpectedRoom = Room(Some(2), "Test room", "Test description", Some("model_test"))
 
     // First fetch of room 2
     when(repMock.getById(firstExpectedRoom.id.get)).thenReturn(Future.successful(Some(

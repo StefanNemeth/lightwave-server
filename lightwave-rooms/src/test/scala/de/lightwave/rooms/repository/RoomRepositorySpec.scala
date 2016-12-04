@@ -25,5 +25,5 @@ object RoomRepositorySpec {
     "lightwave-rooms/src/test/resources/db/schema.sql", "lightwave-rooms/src/test/resources/db/schemadata.sql"
   )) with RoomRepository
 
-  val expectedRoom = Room(Some(1), "Test room", "Test description")
+  val expectedRoom = Room(Some(1), "Test room", "Test description", Some("model_test"))
 }
