@@ -13,4 +13,6 @@ object EngineComponent {
   def props(component: Class[EngineComponent]) = Props(component)
 
   case class Initialize(room: Room)
+  case object Initialized
+  case object AlreadyInitialized
 }

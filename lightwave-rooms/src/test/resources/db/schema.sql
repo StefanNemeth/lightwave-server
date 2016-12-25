@@ -1,6 +1,7 @@
 CREATE TABLE `room_model` (
 	`id` varchar(25) NOT NULL PRIMARY KEY,
-	`heightmap` text NOT NULL
+	`height_map` text NOT NULL,
+	`door_position` varchar(9) NOT NULL
 );
 
 CREATE TABLE `room` (

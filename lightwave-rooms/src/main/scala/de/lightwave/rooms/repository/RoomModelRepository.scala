@@ -30,8 +30,9 @@ private[repository] trait RoomModelTable { this: DBComponent =>
 
   class RoomModelTable(tag: Tag) extends Table[RoomModel](tag, "room_model") {
     val id = column[String]("id", O.PrimaryKey)
-    val heightmap = column[String]("heightmap")
-    def * = (id.?, heightmap) <> (RoomModel.tupled, RoomModel.unapply)
+    val heightMap = column[String]("height_map")
+    val doorPosition = column[String]("door_position")
+    def * = (id.?, heightMap, doorPosition) <> (RoomModel.tupled, RoomModel.unapply)
   }
 
   protected val roomModelQuery = TableQuery[RoomModelTable]

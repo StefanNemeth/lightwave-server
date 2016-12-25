@@ -6,12 +6,13 @@ import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.repository.{RoomModelRepositorySpec, RoomRepositorySpec}
-import org.scalatest.FunSuiteLike
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
 class RoomEngineSpec extends TestKit(ActorSystem("test-system", ConfigFactory.empty))
   with FunSuiteLike
   with DefaultTimeout
-  with ImplicitSender {
+  with ImplicitSender
+  with BeforeAndAfterAll {
 
   test("Initialize engine") {
     withActor() { engine =>
@@ -34,5 +35,9 @@ class RoomEngineSpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
     testCode(system.actorOf(RoomEngine.props(
       MapCoordinator.props(RoomModelRepositorySpec.getRepository())
     )))
+  }
+
+  override def afterAll = {
+    shutdown()
   }
 }

@@ -11,13 +11,6 @@ lazy val lightwaveCommon = Project(
   settings(Commons.settings: _*).
   settings(libraryDependencies ++= commonDependencies)
 
-lazy val lightwaveService = Project(
-  id = "lightwave-service",
-  base = file("lightwave-service")).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= serviceDependencies).
-  dependsOn(lightwaveCommon)
-
 lazy val lightwaveRooms = Project(
   id = "lightwave-rooms",
   base = file("lightwave-rooms")).
@@ -27,7 +20,7 @@ lazy val lightwaveRooms = Project(
   settings(
     mainClass in Compile := Some("de.lightwave.rooms.RoomServiceApp")
   ).
-  dependsOn(lightwaveService)
+  dependsOn(lightwaveCommon)
 
 
 val services = Seq(

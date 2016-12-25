@@ -31,10 +31,7 @@ object Dependencies {
     scalaLogging,
     slick,
     postgreSQL,
-    h2db
-  )
-
-  val serviceDependencies = Seq(
+    h2db,
     akkaActor,
     akkaCluster,
     akkaLog,
