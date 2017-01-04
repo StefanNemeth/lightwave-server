@@ -1,12 +1,7 @@
 version: '2'
 
 services:
-    db:
-        image: postgres
     lightwave:
-        image: hseeberger/scala-sbt
-        depends_on:
-            - db
+        build: .
         volumes:
-            - .:/root
-        command: bash
+            - .:/lightwave
