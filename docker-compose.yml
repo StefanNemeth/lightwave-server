@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+    db:
+        image: postgres
+    lightwave:
+        image: hseeberger/scala-sbt
+        depends_on:
+            - db
+        volumes:
+            - .:/root
+        command: bash
