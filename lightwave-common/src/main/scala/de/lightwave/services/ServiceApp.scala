@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
+import de.lightwave.dedicated.commands.{DedicatedServerCommandHandler, ThreadedCommandReader}
 
 import scala.collection.JavaConversions._
 
@@ -31,9 +32,14 @@ trait ServiceApp {
 
     val cluster = Cluster(system)
 
+    val serverCommandHandler = new DedicatedServerCommandHandler
+    val defaultCommandReader = new ThreadedCommandReader("server-console-handler", serverCommandHandler)
+
     cluster registerOnMemberUp {
       ServiceApp.Log.info(s"Service node up on '${cluster.selfAddress}'!")
-      onStart(config, system)
+      defaultCommandReader.start()
+
+      onStart(config, system, serverCommandHandler)
     }
   }
 
@@ -41,7 +47,7 @@ trait ServiceApp {
     * To be defined by the service implementation.
     * It's called when the cluster is ready to go.
     */
-  def onStart(config: Config, system: ActorSystem): Unit
+  def onStart(config: Config, system: ActorSystem, commandHandler: DedicatedServerCommandHandler): Unit
 }
 
 object ServiceApp {
