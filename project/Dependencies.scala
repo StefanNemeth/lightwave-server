@@ -5,6 +5,7 @@ object Dependencies {
   object Versions {
     val akka = "2.4.14"
     val scalaTest = "3.0.0"
+    val slick = "3.1.1"
   }
 
   // Libraries
@@ -19,7 +20,8 @@ object Dependencies {
   val scalactic = "org.scalactic" %% "scalactic" % Versions.scalaTest
   val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest % "test" exclude("org.scala-lang", "scala-reflect") exclude("org.scala-lang.modules", "scala-xml_2.11")
   val mockito = "org.mockito" % "mockito-core" % "2.2.28"
-  val slick = "com.typesafe.slick" %% "slick" % "3.1.1"
+  val slick = "com.typesafe.slick" %% "slick" % Versions.slick
+  val slickHikari = "com.typesafe.slick" %% "slick-hikaricp" % Versions.slick
   val postgreSQL = "postgresql" % "postgresql" % "9.1-901.jdbc4"
   val h2db = "com.h2database" % "h2" % "1.4.193"
 
@@ -30,6 +32,7 @@ object Dependencies {
     logback,
     scalaLogging,
     slick,
+    slickHikari,
     postgreSQL,
     h2db,
     akkaActor,
