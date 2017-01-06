@@ -1,7 +1,17 @@
 version: '2'
 
 services:
-    lightwave:
-        build: .
-        volumes:
-            - .:/lightwave
+ # lightwave:
+ #   build: .
+ #   volumes:
+ #       - .:/lightwave
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=lightwave
+    volumes:
+      - ./scripts/init-postgres-db.sql:/docker-entrypoint-initdb.d/init-postgres-db.sql
+    ports:
+      - "5432:5432"
