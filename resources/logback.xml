@@ -9,6 +9,7 @@
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
     <logger name="akka" level="WARN" />
+    <logger name="com.zaxxer.hikari.pool.HikariPool" level="WARN" />
 
     <!-- Our code base !-->
     <logger name="de.lightwave" level="DEBUG" />
