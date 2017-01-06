@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.sharding.ShardRegion
 import de.lightwave.rooms.engine.EngineComponent.Initialize
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
+import de.lightwave.rooms.engine.entities.EntityDirector
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.model.Room
 
@@ -15,6 +16,7 @@ import de.lightwave.rooms.model.Room
   */
 class RoomEngine(mapCoordinatorProps: Props) extends Actor with ActorLogging {
   val mapCoordinator: ActorRef = context.actorOf(mapCoordinatorProps, "MapCoordinator")
+  val entityDirector: ActorRef = context.actorOf(EntityDirector.props(), "EntityDirector")
 
   override def preStart() = {
     log.debug("Starting new room engine")
@@ -24,7 +26,7 @@ class RoomEngine(mapCoordinatorProps: Props) extends Actor with ActorLogging {
   def initialize(room: Room): Unit = {
     log.debug(s"Initializing room '${room.name}'")
 
-    mapCoordinator ! Initialize(room)
+    Array(mapCoordinator, entityDirector).foreach(_ ! Initialize(room))
   }
 
   // Initialize engine before doing stuff
