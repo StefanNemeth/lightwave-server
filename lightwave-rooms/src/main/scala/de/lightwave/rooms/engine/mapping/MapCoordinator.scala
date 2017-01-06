@@ -17,7 +17,7 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
   var heights = new RoomMap[Int](0, 0)
   var states  = new RoomMap[MapUnit](0, 0)
 
-  def init(model: RoomModel): Unit = {
+  def initialize(model: RoomModel): Unit = {
     log.debug(s"Initializing coordinator using height map '${model.heightMap}'")
 
     heights = RoomModelParser.toHeightMap(model)
@@ -31,14 +31,14 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
   def initialReceive: Receive = {
     case Initialize(room) => room.modelId match {
       case None =>
-        init(RoomModels.DefaultMap)
+        initialize(RoomModels.DefaultMap)
         sender() ! InitializedFallback
       case Some(modelId) => modelRepository.getById(modelId) match {
         case None =>
-          init(RoomModels.DefaultMap)
+          initialize(RoomModels.DefaultMap)
           sender() ! InitializedFallback
         case Some(model) =>
-          init(model)
+          initialize(model)
           sender() ! Initialized
       }
     }
