@@ -11,10 +11,9 @@ class DedicatedServerCommandHandler {
 
   /**
     * Parse a command and execute it on the current context
-    * @throws IllegalStateException or IllegalArgumentException on
-    *         - Non-existent commands
-    *         - Unset context
-    *         - Invalid commands (empty line)
+    * @throws IllegalStateException on unset context
+    *         IllegalArgumentException on invalid input
+    *         MatchError on non-existent commands
     */
   def handle(commandLine: String): Unit = context match {
     case None => throw new IllegalStateException("No context set")
@@ -25,12 +24,13 @@ class DedicatedServerCommandHandler {
         throw new IllegalArgumentException("Invalid command (empty)")
       }
 
-      extractedContext.getCommand(parts(0).toLowerCase()) match {
-        case None => throw new IllegalArgumentException("Command not found")
-        case Some(command) =>
-          val args = Array.ofDim[String](parts.length - 1)
-          System.arraycopy(parts, 1, args, 0, parts.length - 1)
-          command.execute(args)
+      val args = Array.ofDim[String](parts.length - 1)
+      System.arraycopy(parts, 1, args, 0, parts.length - 1)
+
+      try {
+        extractedContext.handle(args)(parts(0).toLowerCase())
+      } catch {
+        case ex: MatchError => throw new MatchError("Command doesn't exist")
       }
     }
   }

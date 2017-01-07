@@ -20,7 +20,7 @@ class DedicatedServerCommandHandlerSpec extends FunSuite {
   }
 
   test("Throw exception on non-existent command") {
-    intercept[IllegalArgumentException] {
+    intercept[MatchError] {
       createHandler().handle("abc")
     }
   }
@@ -36,16 +36,8 @@ class DedicatedServerCommandHandlerSpec extends FunSuite {
   }
 }
 
-class TestDedicatedServerCommand extends DedicatedServerCommand {
-  override def commandName: String = "test"
-
-  override def execute(args: Array[String]): Unit = {
-    // Empty
-  }
-}
-
 class TestDedicatedServerCommandContext extends DedicatedServerCommandContext {
-  override def initialize(): Unit = {
-    registerCommand(new TestDedicatedServerCommand())
+  override def handle(args: Array[String]) = {
+    case "test" =>
   }
 }
