@@ -37,5 +37,5 @@ class DedicatedServerCommandHandler {
 }
 
 object DedicatedServerCommandHandler {
-  val Log = Logger[DedicatedServerCommandHandler]
+  val Log = Logger("server")
 }
