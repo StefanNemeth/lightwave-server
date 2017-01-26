@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
+import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
 import de.lightwave.rooms.repository.RoomRepositorySpec
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
@@ -27,6 +28,16 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
 
       director ! Initialize(RoomRepositorySpec.expectedRoom)
       expectMsg(AlreadyInitialized)
+    }
+  }
+
+  test("Spawn entity") {
+    withActor() { director =>
+      director ! Initialize(RoomRepositorySpec.expectedRoom)
+      expectMsg(Initialized)
+
+      director ! SpawnEntity(EntityReference(""))
+      expectMsgClass(classOf[ActorRef])
     }
   }
 

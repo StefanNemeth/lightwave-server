@@ -4,6 +4,7 @@ import akka.actor.Actor.Receive
 import akka.actor.{ActorRef, Props}
 import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
+import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
 
 import scala.collection.mutable
 
@@ -21,9 +22,9 @@ class EntityDirector extends EngineComponent {
     * Generates a new entity id and spawns an entity assigned to it
     * @return Reference to entity
     */
-  def spawnEntity(): ActorRef = {
+  def spawnEntity(reference: EntityReference): ActorRef = {
     val entityId = { idGenerator += 1; idGenerator }
-    val entity = context.actorOf(RoomEntity.props(entityId))
+    val entity = context.actorOf(RoomEntity.props(entityId, reference))
 
     entities += (entityId -> entity)
     entity
@@ -39,9 +40,12 @@ class EntityDirector extends EngineComponent {
 
   def initializedReceive: Receive = {
     case Initialize(_) => sender() ! AlreadyInitialized
+    case SpawnEntity(reference) => sender() ! spawnEntity(reference)
   }
 }
 
 object EntityDirector {
+  case class SpawnEntity(reference: EntityReference)
+
   def props() = Props(classOf[EntityDirector])
 }
