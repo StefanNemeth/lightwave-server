@@ -8,7 +8,7 @@ import de.lightwave.rooms.model.RoomModels.RoomModelId
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object RoomModelRepository extends RoomModelRepository with PostgresDBComponent
+object RoomModelRepository extends PostgresDBComponent with RoomModelRepository
 
 private[rooms] trait RoomModelRepository extends RoomModelTable { this: DBComponent =>
   import driver.api._
