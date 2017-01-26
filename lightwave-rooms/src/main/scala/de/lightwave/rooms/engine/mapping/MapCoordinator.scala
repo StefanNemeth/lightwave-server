@@ -18,7 +18,7 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
   var states  = new RoomMap[MapUnit](0, 0)
 
   def initialize(model: RoomModel): Unit = {
-    log.debug(s"Initializing coordinator using height map '${model.heightMap}'")
+    log.debug(s"Initializing coordinator using height map '${model.id}'")
 
     heights = RoomModelParser.toHeightMap(model)
     states = RoomModelParser.toStateMap(model)
