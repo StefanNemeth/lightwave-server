@@ -13,6 +13,7 @@
 
     <!-- Our code base !-->
     <logger name="de.lightwave" level="DEBUG" />
+    <logger name="server" level="DEBUG" />
 
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
