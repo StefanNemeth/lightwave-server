@@ -38,8 +38,8 @@ object RoomModelParser {
     map
   }
 
-  def toHeightMap(model: RoomModel): RoomMap[Int] = {
-    val map = toEmptyMap[Int](model.heightMap)
+  def toHeightMap(model: RoomModel): RoomMap[Double] = {
+    val map = toEmptyMap[Double](model.heightMap)
     val cols = model.heightMap.split("\\r?\\n")
 
     for {

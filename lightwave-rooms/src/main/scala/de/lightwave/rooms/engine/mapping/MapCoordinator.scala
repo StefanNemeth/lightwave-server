@@ -3,7 +3,7 @@ package de.lightwave.rooms.engine.mapping
 import akka.actor.{ActorLogging, Props}
 import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{GetState, GetHeight, SetStateAndHeight, InitializedFallback}
+import de.lightwave.rooms.engine.mapping.MapCoordinator._
 import de.lightwave.rooms.model.{RoomModel, RoomModels}
 import de.lightwave.rooms.repository.RoomModelRepository
 
@@ -14,14 +14,15 @@ import de.lightwave.rooms.repository.RoomModelRepository
 class MapCoordinator(modelRepository: RoomModelRepository) extends EngineComponent with ActorLogging {
   // Define maps that are responsible for storing heights
   // and states of all tiles
-  var heights = new RoomMap[Int](0, 0)
+  var heights = new RoomMap[Double](0, 0)
   var states  = new RoomMap[MapUnit](0, 0)
 
-  def initialize(model: RoomModel): Unit = {
-    log.debug(s"Initializing coordinator using height map '${model.id}'")
+  var doorPosition = Vector2(0, 0)
 
+  def initialize(model: RoomModel): Unit = {
     heights = RoomModelParser.toHeightMap(model)
     states = RoomModelParser.toStateMap(model)
+    doorPosition = Vector2.from(model.doorPosition)
   
     context.become(initializedReceive)
   }
@@ -53,6 +54,8 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
     case SetStateAndHeight(x, y, state, height) =>
       states.set(x, y)(state)
       heights.set(x, y)(height)
+
+    case GetDoorPosition => sender() ! doorPosition
   }
 }
 
@@ -60,6 +63,7 @@ object MapCoordinator {
   case class GetState(x: Int, y: Int)
   case class GetHeight(x: Int, y: Int)
   case class SetStateAndHeight(x: Int, y:Int, state: MapUnit, height: Int)
+  case object GetDoorPosition
 
   case object InitializedFallback
 

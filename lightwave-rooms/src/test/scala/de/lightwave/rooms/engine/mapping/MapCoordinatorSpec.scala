@@ -5,7 +5,7 @@ import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.model.Room
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{InitializedFallback, GetState, GetHeight, SetStateAndHeight}
+import de.lightwave.rooms.engine.mapping.MapCoordinator._
 import de.lightwave.rooms.repository.{RoomModelRepositorySpec, RoomRepositorySpec}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
@@ -63,6 +63,16 @@ class MapCoordinatorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
 
       coordinator ! GetHeight(2, 0)
       expectMsg(Some(0))
+    }
+  }
+
+  test("Get door position of map") {
+    withActor() { coordinator =>
+      coordinator ! Initialize(Room(Some(1), "", "", None))
+      expectMsg(InitializedFallback)
+
+      coordinator ! GetDoorPosition
+      expectMsg(Vector2(0, 0))
     }
   }
 
