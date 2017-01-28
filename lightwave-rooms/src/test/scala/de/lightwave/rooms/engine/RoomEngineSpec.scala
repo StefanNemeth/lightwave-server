@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
+import de.lightwave.rooms.engine.entities.EntityDirector
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.repository.{RoomModelRepositorySpec, RoomRepositorySpec}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -33,7 +34,7 @@ class RoomEngineSpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
 
   private def withActor()(testCode: ActorRef => Any): Unit = {
     testCode(system.actorOf(RoomEngine.props(
-      MapCoordinator.props(RoomModelRepositorySpec.getRepository())
+      MapCoordinator.props(RoomModelRepositorySpec.getRepository()), EntityDirector.props()
     )))
   }
 

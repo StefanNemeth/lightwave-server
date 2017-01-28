@@ -1,7 +1,12 @@
 package de.lightwave.rooms.engine.entities
 
-import akka.actor.{Actor, Props}
-import akka.actor.Actor.Receive
+import akka.actor.{Actor, ActorRef, Props}
+import akka.util.Timeout
+import de.lightwave.rooms.engine.entities.RoomEntity.{PositionUpdated, SetPosition, TeleportTo}
+import de.lightwave.rooms.engine.mapping.MapCoordinator.GetHeight
+import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
+import de.lightwave.rooms.model.Rooms.RoomId
+import de.lightwave.services.pubsub.Broadcaster.Publish
 
 case class EntityReference(name: String)
 
@@ -11,12 +16,32 @@ case class EntityReference(name: String)
   *
   * @param id Virtual id
   */
-class RoomEntity(id: Int, reference: EntityReference) extends Actor {
+class RoomEntity(id: Int, reference: EntityReference, mapCoordinator: ActorRef, broadcaster: ActorRef) extends Actor {
+  import akka.pattern._
+  import scala.concurrent.duration._
+  import context.dispatcher
+
+  var position = new Vector3(0, 0, 0.0)
+
   override def receive: Receive = {
-    case _ =>
+    case TeleportTo(pos) =>
+      // Get height of new position and update current entity position
+      (mapCoordinator ? GetHeight(pos.x, pos.y))(Timeout(5.seconds)).mapTo[Option[Double]].map {
+        case Some(height) => SetPosition(Vector3(pos.x, pos.y, height))
+        case None => SetPosition(pos)
+      } pipeTo self
+
+    case SetPosition(pos) =>
+      position = pos
+      broadcaster ! Publish(PositionUpdated(id, pos))
   }
 }
 
 object RoomEntity {
-  def props(id: Int, reference: EntityReference) = Props(classOf[RoomEntity], id, reference)
+  case class TeleportTo(pos: Vector2)
+  case class SetPosition(pos: Vector3)
+
+  case class PositionUpdated(id: Int, pos: Vector3)
+
+  def props(id: Int, reference: EntityReference)(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[RoomEntity], id, reference, mapCoordinator, broadcaster)
 }
