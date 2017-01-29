@@ -13,11 +13,12 @@ CREATE TABLE room (
 
 INSERT INTO room_model (id, height_map, door_position) VALUES (
     'model_a',
-    'xxxxxxxxxxxx\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxxxxxxxxxx\nxxxxxxxxxxxx',
+    E'xxxxxxxxxxxx\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxxxxxxxxxx\nxxxxxxxxxxxx',
     '3;5'
 );
 
-INSERT INTO room (name, description, model_id) VALUES (
+INSERT INTO room (id, name, description, model_id) VALUES (
+    1,
     'Test',
     'Test room',
     'model_a'
