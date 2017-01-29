@@ -10,3 +10,15 @@ CREATE TABLE room (
 	description varchar(128) NOT NULL,
 	model_id varchar(25) NOT NULL REFERENCES room_model
 );
+
+INSERT INTO room_model (id, height_map, door_position) VALUES (
+    'model_a',
+    'xxxxxxxxxxxx\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxxxxxxxxxx\nxxxxxxxxxxxx',
+    '3;5'
+);
+
+INSERT INTO room (name, description, model_id) VALUES (
+    'Test',
+    'Test room',
+    'model_a'
+);
