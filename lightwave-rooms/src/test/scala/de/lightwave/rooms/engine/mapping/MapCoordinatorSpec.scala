@@ -76,6 +76,21 @@ class MapCoordinatorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
     }
   }
 
+  test("Get absolute heights of map") {
+    withActor() { coordinator =>
+      coordinator ! Initialize(Room(Some(1), "", "", None))
+      expectMsg(InitializedFallback)
+
+      coordinator ! GetAbsoluteHeightMap
+      expectMsg(IndexedSeq(
+        IndexedSeq(Some(0), Some(0), Some(0), Some(0)),
+        IndexedSeq(Some(0), Some(0), Some(0), Some(0)),
+        IndexedSeq(Some(0), Some(0), Some(0), Some(0)),
+        IndexedSeq(Some(0), Some(0), Some(0), Some(0))
+      ))
+    }
+  }
+
   test("Set state and height of map") {
     withActor() { coordinator =>
       coordinator ! Initialize(Room(Some(1), "", "", None))

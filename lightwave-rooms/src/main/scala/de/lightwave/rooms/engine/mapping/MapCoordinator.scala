@@ -4,6 +4,7 @@ import akka.actor.{ActorLogging, Props}
 import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
 import de.lightwave.rooms.engine.mapping.MapCoordinator._
+import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 import de.lightwave.rooms.model.{RoomModel, RoomModels}
 import de.lightwave.rooms.repository.RoomModelRepository
 
@@ -17,13 +18,19 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
   var heights = new RoomMap[Double](0, 0)
   var states  = new RoomMap[MapUnit](0, 0)
 
-  var doorPosition = Vector2(0, 0)
+  // Let's call them pseudo-cache
+  var doorPosition = new Vector2(0, 0)
+  var absoluteHeightMap: StaticMap[Double] = IndexedSeq[IndexedSeq[Option[Double]]]()
 
   def initialize(model: RoomModel): Unit = {
+    // Dynamic properties
     heights = RoomModelParser.toHeightMap(model)
     states = RoomModelParser.toStateMap(model)
+
+    // "Static" properties
     doorPosition = Vector2.from(model.doorPosition)
-  
+    absoluteHeightMap = heights.toStatic
+
     context.become(initializedReceive)
   }
 
@@ -56,6 +63,7 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
       heights.set(x, y)(height)
 
     case GetDoorPosition => sender() ! doorPosition
+    case GetAbsoluteHeightMap => sender() ! absoluteHeightMap
   }
 }
 
@@ -64,6 +72,7 @@ object MapCoordinator {
   case class GetHeight(x: Int, y: Int)
   case class SetStateAndHeight(x: Int, y:Int, state: MapUnit, height: Int)
   case object GetDoorPosition
+  case object GetAbsoluteHeightMap
 
   case object InitializedFallback
 
