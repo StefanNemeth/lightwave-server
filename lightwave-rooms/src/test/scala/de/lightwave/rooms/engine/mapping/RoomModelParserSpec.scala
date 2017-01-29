@@ -25,7 +25,7 @@ class RoomModelParserSpec extends FunSuite {
     val map = RoomModelParser.toHeightMap(RoomModel(None, "1x\nxx\n12", ""))
 
     assert(map.get(0, 0) === Some(1))
-    assert(map.get(0, 1) === Some(0))
+    assert(map.get(0, 1) === None)
     assert(map.get(1, 2) === Some(2))
   }
 

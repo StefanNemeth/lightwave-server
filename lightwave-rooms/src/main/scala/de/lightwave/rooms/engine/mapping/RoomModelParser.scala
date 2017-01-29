@@ -45,7 +45,7 @@ object RoomModelParser {
     for {
       x <- 0 until map.rows
       y <- 0 until map.cols
-    } map.set(x, y)(if (cols(y)(x).isDigit) Integer.parseInt(cols(y)(x).toString) else 0)
+    } if (cols(y)(x).isDigit) map.set(x, y)(Integer.parseInt(cols(y)(x).toString))
 
     map
   }
