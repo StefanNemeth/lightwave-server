@@ -2,7 +2,7 @@ package de.lightwave.rooms.engine.entities
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
-import de.lightwave.rooms.engine.entities.RoomEntity.{PositionUpdated, SetPosition, TeleportTo}
+import de.lightwave.rooms.engine.entities.RoomEntity.{EntityPositionUpdated, SetPosition, TeleportTo}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetHeight
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.rooms.model.Rooms.RoomId
@@ -33,7 +33,7 @@ class RoomEntity(id: Int, reference: EntityReference, mapCoordinator: ActorRef, 
 
     case SetPosition(pos) =>
       position = pos
-      broadcaster ! Publish(PositionUpdated(id, pos))
+      broadcaster ! Publish(EntityPositionUpdated(id, pos))
   }
 }
 
@@ -41,7 +41,7 @@ object RoomEntity {
   case class TeleportTo(pos: Vector2)
   case class SetPosition(pos: Vector3)
 
-  case class PositionUpdated(id: Int, pos: Vector3)
+  case class EntityPositionUpdated(id: Int, pos: Vector3)
 
   def props(id: Int, reference: EntityReference)(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[RoomEntity], id, reference, mapCoordinator, broadcaster)
 }
