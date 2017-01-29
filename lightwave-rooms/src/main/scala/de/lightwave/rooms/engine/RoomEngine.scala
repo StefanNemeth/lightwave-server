@@ -10,6 +10,7 @@ import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom,
 import de.lightwave.rooms.engine.entities.EntityDirector
 import de.lightwave.rooms.engine.entities.EntityDirector.{GetEntity, SpawnEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator
+import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.model.Room
 import de.lightwave.services.pubsub.Broadcaster
 import de.lightwave.services.pubsub.Broadcaster.{Subscribe, Unsubscribe}
@@ -49,10 +50,13 @@ class RoomEngine(mapCoordinatorProps: Props, entityDirectorProps: ((ActorRef, Ac
   def initializedReceive: Receive = {
     case InitializeRoom(_) => sender() ! AlreadyInitialized
 
+    case msg @ Subscribe(ref) =>
+      mapCoordinator.tell(GetAbsoluteHeightMap, ref)
+      broadcaster forward msg
+
     // Public API
     case msg @ SpawnEntity(_) => entityDirector forward msg
     case msg @ GetEntity(_) => entityDirector forward msg
-    case msg @ Subscribe(ref) => broadcaster forward msg
     case msg @ Unsubscribe(ref) => broadcaster forward msg
   }
 }
