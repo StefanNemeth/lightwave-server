@@ -26,13 +26,11 @@ class RoomVisualization(map: StaticMap[Double]) {
     if (map.nonEmpty && map(0).nonEmpty) {
       for (y <- map(0).indices) {
         for (x <- map.indices) if (entities.count(p => p._2.x == x && p._2.y == y) < 1) map(x)(y) match {
-          case Some(height) => builder.append("X")
-          case None => builder.append(" ")
-        } else builder.append("P")
-        builder.append("\n")
+          case Some(height) => print("X")
+          case None => print(" ")
+        } else print("P")
+        println()
       }
     }
-
-    print(builder.toString())
   }
 }
