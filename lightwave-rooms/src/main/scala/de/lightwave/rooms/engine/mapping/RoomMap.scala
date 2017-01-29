@@ -1,5 +1,7 @@
 package de.lightwave.rooms.engine.mapping
 
+import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
+
 /**
   * Represents a mutable room map and specific information regarding its units.
   * E.g. their heights or whether they are walkable.
@@ -43,7 +45,13 @@ class RoomMap[T](val rows: Int, val cols: Int) {
     underlyingMap(x)(y) = Some(value)
   }
 
+  def toStatic: StaticMap[T] = underlyingMap.map(x => x.toIndexedSeq).toIndexedSeq
+
   override def toString: String = s"${rows}x${cols} Room map"
+}
+
+object RoomMap {
+  type StaticMap[T] = IndexedSeq[IndexedSeq[Option[T]]]
 }
 
 sealed trait MapUnit

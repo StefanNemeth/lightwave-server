@@ -31,4 +31,11 @@ class RoomMapSpec extends FunSuite {
     assert(map.get(1, 0) === None)
     assert(map.get(2, 2) === None)
   }
+
+  test("Convert room map to static map") {
+    val map = new RoomMap[Int](1, 1)
+
+    map.set(0, 0)(1)
+    assert(map.toStatic == IndexedSeq(IndexedSeq(Some(1))))
+  }
 }
