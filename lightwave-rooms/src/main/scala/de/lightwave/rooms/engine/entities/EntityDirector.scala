@@ -4,7 +4,7 @@ import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.util.Timeout
 import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
-import de.lightwave.rooms.engine.entities.EntityDirector.{EntitySpawned, GetEntity, SetSpawnPosition, SpawnEntity}
+import de.lightwave.rooms.engine.entities.EntityDirector._
 import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetDoorPosition
 import de.lightwave.rooms.engine.mapping.Vector2
@@ -40,7 +40,7 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
     val entity = context.actorOf(RoomEntity.props(entityId, reference)(mapCoordinator, broadcaster))
 
     entities += (entityId -> entity)
-    broadcaster ! Publish(EntitySpawned(reference, entity))
+    broadcaster ! Publish(EntitySpawned(entityId, reference, entity))
 
     log.debug(s"Spawning new entity '${reference.name}'")
 
@@ -74,7 +74,7 @@ object EntityDirector {
   case class SpawnEntity(reference: EntityReference)
   case class SetSpawnPosition(position: Vector2)
 
-  case class EntitySpawned(reference: EntityReference, entity: ActorRef)
+  case class EntitySpawned(id: Int, reference: EntityReference, entity: ActorRef)
 
   def props()(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[EntityDirector], mapCoordinator, broadcaster)
 }
