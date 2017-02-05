@@ -37,7 +37,8 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
   }
 
   /**
-    * Extracts header of the first message and parses all messages
+    * Extracts header of the first message, parses all messages and sends them
+    * to $recipient
     * @throws BufferOverflowException on data overflow of ConnectionHandler.MAX_PACKET_SIZE
     */
   def parseMessage(data: ByteString, recipient: ActorRef): Unit = if (data.length >= MessageHeader.LENGTH && data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {
@@ -47,7 +48,8 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
   }
 
   /**
-    * Parse data composed of multiple messages without the first header
+    * Parses data composed of multiple messages without the first header and sends it
+    * to $recipient
     * @throws BufferOverflowException on data overflow of ConnectionHandler.MAX_PACKET_SIZE
     */
   def parseMessage(header: MessageHeader, data: ByteString, recipient: ActorRef): Unit = if (data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {

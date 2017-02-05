@@ -17,6 +17,7 @@ object MessageHeader {
     if (header.length < MessageHeader.LENGTH) {
       throw new IllegalArgumentException("Invalid header size.")
     }
-    new MessageHeader(NumberEncoding.decodeShort(header.slice(0, 3)), NumberEncoding.decodeShort(header.slice(3, 5)))
+    val len = NumberEncoding.decodeShort(header.slice(0, 3)) - 2
+    new MessageHeader(if (len <= 0) 0.toShort else len.toShort, NumberEncoding.decodeShort(header.slice(3, 5)))
   }
 }

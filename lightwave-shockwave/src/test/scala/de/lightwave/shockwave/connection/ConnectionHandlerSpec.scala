@@ -18,14 +18,14 @@ class ConnectionHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFac
 
   test ("Parse message in a single chunk") {
     withActor() { handler =>
-      handler ! ParseMessage(ByteString("@@@@A"))
+      handler ! ParseMessage(ByteString("@@B@A"))
       expectMsg(ParsedMessage(MessageHeader(0, 1), ByteString("")))
     }
   }
 
   test ("Parse message in multiple chunks") {
     withActor() { handler =>
-      handler ! ParseMessage(ByteString("@@C@B"))
+      handler ! ParseMessage(ByteString("@@E@B"))
       expectNoMsg()
 
       handler ! ParseMessage(ByteString("AB"))
