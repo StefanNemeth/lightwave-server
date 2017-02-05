@@ -22,18 +22,18 @@ lazy val lightwaveRooms = Project(
   ).
   dependsOn(lightwaveCommon)
 
-lazy val lightwaveConsole = Project(
-  id = "lightwave-console",
-  base = file("lightwave-console")).
+lazy val lightwaveShockwave = Project(
+  id = "lightwave-shockwave",
+  base = file("lightwave-shockwave")).
   settings(Commons.settings: _*).
   settings(libraryDependencies ++= commonDependencies).
   settings(
-    mainClass in Compile := Some("de.lightwave.console.ConsoleApp")
+    mainClass in Compile := Some("de.lightwave.shockwave.ShockwaveServiceApp")
   ).
   dependsOn(lightwaveCommon).
   dependsOn(lightwaveRooms)
 
 val services = Seq(
   lightwaveRooms,
-  lightwaveConsole
+  lightwaveShockwave
 )
