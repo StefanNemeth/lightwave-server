@@ -5,7 +5,7 @@ import java.nio.BufferOverflowException
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.util.ByteString
-import de.lightwave.shockwave.connection.ConnectionHandler.ParsedMessage
+import de.lightwave.shockwave.connection.ConnectionHandler.{ParseMessage, ParsedMessage}
 import de.lightwave.shockwave.protocol.MessageHeader
 
 /**
@@ -22,23 +22,26 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
 
   override def receive: Receive = receive(None)
 
-  def receive(collected: Option[Tuple2[MessageHeader, ByteString]]): Receive = {
-    case Received(data) => collected match {
-      case Some((header, collectedBody)) =>
-        context.unbecome()
-        parseMessage(header, collectedBody ++ data)
-      case None => parseMessage(data)
-    }
+  def receive(implicit collected: Option[(MessageHeader, ByteString)]): Receive = {
+    case Received(data) => receiveMessage(data, self)
+    case ParseMessage(data) => receiveMessage(data, sender())
     case ParsedMessage(header, body) => log.debug(s"Parsed message ${header.operationCode}: ${body.utf8String}")
     case Closed => context stop self
+  }
+
+  private def receiveMessage(data: ByteString, recipient: ActorRef)(implicit collected: Option[(MessageHeader, ByteString)]) = collected match {
+    case Some((header, collectedBody)) =>
+      context.unbecome()
+      parseMessage(header, collectedBody ++ data, recipient)
+    case None => parseMessage(data, recipient)
   }
 
   /**
     * Extracts header of the first message and parses all messages
     * @throws BufferOverflowException on data overflow of ConnectionHandler.MAX_PACKET_SIZE
     */
-  def parseMessage(data: ByteString): Unit = if (data.length >= MessageHeader.LENGTH && data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {
-    parseMessage(MessageHeader.from(data.slice(0, MessageHeader.LENGTH)), data.slice(MessageHeader.LENGTH, data.length))
+  def parseMessage(data: ByteString, recipient: ActorRef): Unit = if (data.length >= MessageHeader.LENGTH && data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {
+    parseMessage(MessageHeader.from(data.slice(0, MessageHeader.LENGTH)), data.slice(MessageHeader.LENGTH, data.length), recipient)
   } else {
     throw new BufferOverflowException
   }
@@ -47,7 +50,7 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
     * Parse data composed of multiple messages without the first header
     * @throws BufferOverflowException on data overflow of ConnectionHandler.MAX_PACKET_SIZE
     */
-  def parseMessage(header: MessageHeader, data: ByteString): Unit = if (data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {
+  def parseMessage(header: MessageHeader, data: ByteString, recipient: ActorRef): Unit = if (data.length <= (ConnectionHandler.MAX_PACKET_SIZE - MessageHeader.LENGTH)) {
     val remainingBytes = data.length
 
     // If the message is not completely available, wait for the remaining bytes
@@ -57,11 +60,11 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
     // Otherwise, handle the packet(s)
     } else if (remainingBytes >= header.bodyLength) {
       // Fire it!
-      self ! ParsedMessage(header, data.slice(0, header.bodyLength))
+      recipient ! ParsedMessage(header, data.slice(0, header.bodyLength))
 
       // Handle another packet if there are unread bytes left
       if (remainingBytes > header.bodyLength) {
-        parseMessage(data.slice(header.bodyLength, remainingBytes))
+        parseMessage(data.slice(header.bodyLength, remainingBytes), recipient)
       }
     }
   } else {
@@ -71,6 +74,8 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
 
 object ConnectionHandler {
   val MAX_PACKET_SIZE = 2048
+
+  case class ParseMessage(body: ByteString)
 
   case class ParsedMessage(header: MessageHeader, body: ByteString)
 
