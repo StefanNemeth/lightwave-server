@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 
 import akka.actor.{ActorLogging, Props}
 import de.lightwave.services.Service
-import de.lightwave.shockwave.connection.ConnectionHandler
+import de.lightwave.shockwave.io.ConnectionHandler
 
 /**
   * Front-end server which provides game access to Habbo shockwave

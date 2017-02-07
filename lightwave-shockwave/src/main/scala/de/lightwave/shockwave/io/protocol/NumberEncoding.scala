@@ -1,4 +1,4 @@
-package de.lightwave.shockwave.protocol
+package de.lightwave.shockwave.io.protocol
 
 import akka.util.ByteString
 

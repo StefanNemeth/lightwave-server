@@ -1,4 +1,4 @@
-package de.lightwave.shockwave.protocol
+package de.lightwave.shockwave.io.protocol.message
 
 import akka.util.ByteString
 import org.scalatest.FunSuite

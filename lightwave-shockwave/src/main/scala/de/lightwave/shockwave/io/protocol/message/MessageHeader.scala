@@ -1,9 +1,11 @@
-package de.lightwave.shockwave.protocol
+package de.lightwave.shockwave.io.protocol.message
 
 import akka.util.ByteString
+import de.lightwave.shockwave.io.protocol.NumberEncoding
 
 /**
   * Represents the header of a shockwave message
+  *
   * @param bodyLength Length of the packet without the header
   * @param operationCode Short number that indicates the
   *                      type of message
@@ -11,10 +13,10 @@ import akka.util.ByteString
 case class MessageHeader(bodyLength: Short, operationCode: Short)
 
 object MessageHeader {
-  val LENGTH = 5
+  val Length = 5
 
   def from(header: ByteString): MessageHeader = {
-    if (header.length < MessageHeader.LENGTH) {
+    if (header.length < MessageHeader.Length) {
       throw new IllegalArgumentException("Invalid header size.")
     }
     val len = NumberEncoding.decodeShort(header.slice(0, 3)) - 2
