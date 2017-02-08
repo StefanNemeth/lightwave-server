@@ -19,7 +19,7 @@ class MessageWriter(opCode: Short) {
     * Format: STR+CHR(2)
     */
   def push(s: String): MessageWriter = {
-    messageStream.write(s.getBytes())
+    messageStream.write(MessageWriter.filterString(s).getBytes())
     push(2.toByte)
     this
   }
@@ -74,4 +74,15 @@ class MessageWriter(opCode: Short) {
 
     result
   }
+}
+
+/**
+  * Utility functions regarding message writing
+  */
+object MessageWriter {
+  /**
+    * Remove characters from string that could disturb
+    * the client message reader
+    */
+  def filterString(str: String): String = str.filter(_.toInt >= 32)
 }

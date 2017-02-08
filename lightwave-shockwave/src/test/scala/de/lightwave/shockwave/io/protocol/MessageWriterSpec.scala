@@ -25,4 +25,8 @@ class MessageWriterSpec extends FunSuite {
   test("Push string") {
     assert(new MessageWriter(0).push("test").toByteString == ByteString("@@test" + 2.toChar + 1.toChar))
   }
+
+  test("Filter string") {
+    assert(MessageWriter.filterString(2.toChar + "hi") == "hi")
+  }
 }
