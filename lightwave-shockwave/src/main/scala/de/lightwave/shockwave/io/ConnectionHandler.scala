@@ -12,7 +12,7 @@ import de.lightwave.shockwave.io.protocol.message.outgoing.miscellaneous.PingMes
 /**
   * Handler of clients that are connected to the shockwave server.
   */
-class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) extends Actor with ActorLogging {
+class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef, messageHandler: ActorRef) extends Actor with ActorLogging {
   import akka.io.Tcp._
 
   context watch connection
@@ -32,7 +32,7 @@ class ConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef) 
     case MessageRead(header, body) => MessageParser.get(header.operationCode) match {
       case Some(parser) =>
         log.debug(s"Parsing message ${header.operationCode}: ${body.utf8String}")
-        parser.parse(header, body)
+        messageHandler ! parser.parse(header, body)
       case None => log.warning(s"Couldn't find parser for message ${header.operationCode}: ${body.utf8String}")
     }
     case Closed => context stop self
@@ -90,5 +90,5 @@ object ConnectionHandler {
 
   case class MessageRead(header: MessageHeader, body: ByteString)
 
-  def props(remoteAddress: InetSocketAddress, connection: ActorRef) = Props(classOf[ConnectionHandler], remoteAddress, connection)
+  def props(remoteAddress: InetSocketAddress, connection: ActorRef, messageHandler: ActorRef) = Props(classOf[ConnectionHandler], remoteAddress, connection, messageHandler)
 }
