@@ -1,8 +1,8 @@
 package de.lightwave.shockwave.io.protocol
 
 import akka.util.ByteString
-import de.lightwave.io.tcp.protocol.{MessageReader, _}
-import de.lightwave.shockwave.io.protocol.messages.PongMessageParser
+import de.lightwave.io.tcp.protocol._
+import de.lightwave.shockwave.io.protocol.messages.{GenerateKeyMessageParser, InitCryptoMessageParser, LoginMessageParser, PongMessageParser}
 
 trait ShockwaveMessage extends Message
 
@@ -11,7 +11,7 @@ trait ShockwaveMessage extends Message
   * to certain operation codes
   */
 object ShockwaveMessageParser extends MessageParserLibrary {
-  private var parsers: Array[MessageParser[_]] = Array(PongMessageParser)
+  private var parsers: Array[MessageParser[_]] = Array(PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser)
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =
     parsers.flatMap(parser => parser.opCodes.map(_ -> parser)).toMap
@@ -27,7 +27,7 @@ object ShockwaveMessageHeader extends MessageHeaderParser {
       throw new IllegalArgumentException("Invalid header size.")
     }
     val len = NumberEncoding.decodeShort(header.slice(0, 3)) - 2
-    new MessageHeader(if (len <= 0) 0.toShort else len.toShort, NumberEncoding.decodeShort(header.slice(3, 5)))
+    MessageHeader(if (len <= 0) 0.toShort else len.toShort, NumberEncoding.decodeShort(header.slice(3, 5)))
   }
 }
 

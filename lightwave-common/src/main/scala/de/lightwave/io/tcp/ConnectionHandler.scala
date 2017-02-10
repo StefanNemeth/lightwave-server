@@ -33,12 +33,13 @@ class ConnectionHandler(
   def receive(implicit collected: Option[(MessageHeader, ByteString)]): Receive = {
     case Received(data) => receiveMessage(data, self)
     case ReadMessage(data) => receiveMessage(data, sender())
-    case MessageRead(header, body) => messageParserLib.get(header.operationCode) match {
-      case Some(parser) =>
-        log.debug(s"Parsing message (${header.operationCode}) ${body.utf8String}")
-        messageHandler ! parser.parse(header, body)
+    case MessageRead(header, body) =>
+      log.debug(s"Parsing message (${header.operationCode}) ${body.utf8String}")
+      messageParserLib.get(header.operationCode) match {
+      case Some(parser) => messageHandler ! parser.parse(header, body)
       case None => log.warning(s"Couldn't find parser for message (${header.operationCode}) ${body.utf8String}")
     }
+    case cmd @ Write(_, _) => connection forward cmd
     case Closed => context stop self
   }
 
