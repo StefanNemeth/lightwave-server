@@ -30,7 +30,7 @@ class ConnectionHandler(
 
   override def receive: Receive = receive(None)
 
-  def receive(implicit collected: Option[(MessageHeader, ByteString)]): Receive = {
+  def receive(implicit collected: Option[(MessageHeader, ByteString)]): Receive = this.customReceive orElse {
     case Received(data) => receiveMessage(data, self)
     case ReadMessage(data) => receiveMessage(data, sender())
     case MessageRead(header, body) =>
@@ -41,7 +41,10 @@ class ConnectionHandler(
     }
     case cmd @ Write(_, _) => connection forward cmd
     case Closed => context stop self
+    case _ =>
   }
+
+  def customReceive: Receive = Map.empty
 
   private def receiveMessage(data: ByteString, recipient: ActorRef)(implicit collected: Option[(MessageHeader, ByteString)]) = collected match {
     case Some((header, collectedBody)) =>

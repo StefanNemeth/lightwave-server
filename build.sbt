@@ -39,7 +39,8 @@ lazy val lightwaveShockwave = Project(
     mainClass in Compile := Some("de.lightwave.shockwave.ShockwaveServiceApp")
   ).
   dependsOn(lightwaveCommon).
-  dependsOn(lightwaveRooms)
+  dependsOn(lightwaveRooms).
+  dependsOn(lightwavePlayers)
 
 val services = Seq(
   lightwaveRooms,

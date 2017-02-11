@@ -11,6 +11,13 @@ CREATE TABLE room (
 	model_id varchar(25) NOT NULL REFERENCES room_model
 );
 
+CREATE TABLE player (
+	id integer PRIMARY KEY,
+	nickname varchar(25) NOT NULL,
+	password bytea NOT NULL,
+	password_salt bytea NOT NULL
+);
+
 INSERT INTO room_model (id, height_map, door_position) VALUES (
     'model_a',
     E'xxxxxxxxxxxx\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxx00000000\nxxxxxxxxxxxx\nxxxxxxxxxxxx',
@@ -22,4 +29,9 @@ INSERT INTO room (id, name, description, model_id) VALUES (
     'Test',
     'Test room',
     'model_a'
+);
+
+-- Password: test
+INSERT INTO player (id, nickname, password, password_salt) VALUES (
+    1, 'Steve', E'\\xC6BE0D6DFC70198BF88E36520B8FC4A4DCB6353D', E'\\x121F3EA5F4E9CC2AA5C097851E7767682AAD1C06'
 );

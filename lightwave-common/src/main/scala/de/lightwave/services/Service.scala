@@ -46,4 +46,14 @@ object ServiceGroups {
       )
     ).props(), name = s"${serviceName}Group"
   )
+
+  /**
+    * Create default round robin group that routes to existent instances of
+    * a specific service.
+    *
+    * @param factory The context to be used
+    * @param service The service to route to
+    * @return The created group
+    */
+  def createGroup(factory: ActorRefFactory, service: ServiceApp): ActorRef = createGroup(factory, service.serviceName, service.role)
 }

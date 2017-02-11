@@ -13,6 +13,9 @@ import scala.collection.JavaConversions._
   * for the sake of consistency.
   */
 trait ServiceApp {
+  def serviceName: String
+  def role: Option[String]
+
   def main(args: Array[String]): Unit = {
     val servicePort = args match {
       case Array()     => "0"

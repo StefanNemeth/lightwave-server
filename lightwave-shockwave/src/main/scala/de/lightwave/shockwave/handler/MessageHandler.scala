@@ -6,9 +6,9 @@ import de.lightwave.shockwave.io.protocol.messages.{FrontpageMessage, HandshakeM
 /**
   * Forwards client messages to handlers of a specific role
   */
-class MessageHandler extends Actor {
-  val handshakeHandler: ActorRef = context.actorOf(HandshakeHandler.props(), "Handshake")
-  val frontpageHandler: ActorRef = context.actorOf(FrontpageHandler.props(), "Frontpage")
+class MessageHandler(handshakeProps: Props, frontpageProps: Props) extends Actor {
+  val handshakeHandler: ActorRef = context.actorOf(handshakeProps, "Handshake")
+  val frontpageHandler: ActorRef = context.actorOf(frontpageProps, "Frontpage")
 
   override def receive: Receive = {
     case e:HandshakeMessage => handshakeHandler forward e
@@ -17,5 +17,7 @@ class MessageHandler extends Actor {
 }
 
 object MessageHandler {
-  def props() = Props(classOf[MessageHandler])
+  def props(handshakeProps: Props, frontpageProps: Props) = Props(classOf[MessageHandler], handshakeProps, frontpageProps)
+
+  def props(playerService: ActorRef): Props = props(HandshakeHandler.props(), FrontpageHandler.props(playerService))
 }

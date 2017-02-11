@@ -17,7 +17,8 @@ object DedicatedRoomServiceCommandContext extends DedicatedServerCommandContext 
 }
 
 object RoomServiceApp extends ServiceApp {
-  val ServiceName = "roomService"
+  val serviceName = "roomService"
+  val role = Some("rooms")
 
   override def onStart(config: Config, system: ActorSystem, commandHandler: DedicatedServerCommandHandler) = {
     // Hosts room engines on service (access them via "startProxy")
@@ -29,7 +30,7 @@ object RoomServiceApp extends ServiceApp {
       extractShardId = RoomEngine.extractShardId)
 
     // Provides room data
-    system.actorOf(RoomService.props(), ServiceName)
+    system.actorOf(RoomService.props(), serviceName)
 
     commandHandler.setContext(DedicatedRoomServiceCommandContext)
   }

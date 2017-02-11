@@ -2,7 +2,7 @@ package de.lightwave.shockwave.io.protocol
 
 import akka.util.ByteString
 import de.lightwave.io.tcp.protocol._
-import de.lightwave.shockwave.io.protocol.messages.{GenerateKeyMessageParser, InitCryptoMessageParser, LoginMessageParser, PongMessageParser}
+import de.lightwave.shockwave.io.protocol.messages._
 
 trait ShockwaveMessage extends Message
 
@@ -11,7 +11,7 @@ trait ShockwaveMessage extends Message
   * to certain operation codes
   */
 object ShockwaveMessageParser extends MessageParserLibrary {
-  private var parsers: Array[MessageParser[_]] = Array(PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser)
+  private var parsers: Array[MessageParser[_]] = Array(PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser)
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =
     parsers.flatMap(parser => parser.opCodes.map(_ -> parser)).toMap
