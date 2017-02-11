@@ -22,6 +22,14 @@ lazy val lightwaveRooms = Project(
   ).
   dependsOn(lightwaveCommon)
 
+lazy val lightwavePlayers = Project(
+  id = "lightwave-players",
+  base = file("lightwave-players")).
+  enablePlugins(JavaAppPackaging).
+  settings(Commons.settings: _*).
+  settings(libraryDependencies ++= commonDependencies).
+  dependsOn(lightwaveCommon)
+
 lazy val lightwaveShockwave = Project(
   id = "lightwave-shockwave",
   base = file("lightwave-shockwave")).
