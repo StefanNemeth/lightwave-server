@@ -25,11 +25,11 @@ class FrontpageHandler(playerService: ActorRef) extends Actor with ActorLogging 
         case None => replyTo ! Write(LoginFailedMessageComposer.compose("Login Incorrect: Invalid username/password combination."))
       }
 
-    case GetPlayerInfoMessage =>
+    case GetPlayerInformationMessage =>
       val replyTo = sender()
 
       (replyTo ? GetPlayerInformation).mapTo[Option[Player]].foreach {
-        case Some(player) => replyTo ! Write(PlayerInformationMessageComposer.compose(player.id.getOrElse(0), player.nickname, "", "", ""))
+        case Some(player) => replyTo ! Write(PlayerInformationMessageComposer.compose(player))
         case None => log.warning("Unauthenticated client trying to fetch player information.")
       }
   }

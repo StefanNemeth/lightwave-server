@@ -6,8 +6,10 @@ import de.lightwave.shockwave.io.protocol.messages._
 
 class HandshakeHandler extends Actor {
   override def receive = {
-    case InitCryptoMessage => sender() ! Write(InitCryptoMessageComposer.compose())
-    case GenerateKeyMessage => sender() ! Write(SessionParamsMessageComposer.compose())
+    case InitCryptoMessage => sender() ! Write(CryptoParametersMessageComposer.compose())
+    case GenerateKeyMessage =>
+      // Don't send key, send session parameters instead
+      sender() ! Write(SessionParametersMessageComposer.compose())
   }
 }
 
