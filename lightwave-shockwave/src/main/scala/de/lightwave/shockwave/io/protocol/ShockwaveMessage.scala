@@ -11,7 +11,10 @@ trait ShockwaveMessage extends Message
   * to certain operation codes
   */
 object ShockwaveMessageParser extends MessageParserLibrary {
-  private var parsers: Array[MessageParser[_]] = Array(PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser)
+  private var parsers: Array[MessageParser[_]] = Array(
+    PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser,
+    GetFlatInformationMessageParser
+  )
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =
     parsers.flatMap(parser => parser.opCodes.map(_ -> parser)).toMap
