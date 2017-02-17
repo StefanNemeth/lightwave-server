@@ -13,7 +13,7 @@ trait ShockwaveMessage extends Message
 object ShockwaveMessageParser extends MessageParserLibrary {
   private var parsers: Array[MessageParser[_]] = Array(
     PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser,
-    GetFlatInformationMessageParser
+    GetFlatInformationMessageParser, NavigateMessageParser, GetRecommendedRoomsParser, GetLoadingAdvertisementParser
   )
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =
