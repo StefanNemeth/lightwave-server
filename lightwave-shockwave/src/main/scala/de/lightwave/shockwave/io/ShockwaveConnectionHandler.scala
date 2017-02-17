@@ -6,7 +6,7 @@ import akka.actor.{ActorRef, Props}
 import de.lightwave.io.tcp.ConnectionHandler
 import de.lightwave.players.model.Player
 import de.lightwave.shockwave.io.ShockwaveConnectionHandler.{GetPlayerInformation, SetPlayerInformation}
-import de.lightwave.shockwave.io.protocol.messages.PingMessageComposer
+import de.lightwave.shockwave.io.protocol.messages.HelloMessageComposer
 import de.lightwave.shockwave.io.protocol.{ShockwaveMessageHeader, ShockwaveMessageParser}
 
 /**
@@ -21,7 +21,7 @@ class ShockwaveConnectionHandler(remoteAddress: InetSocketAddress, connection: A
 
   override def preStart(): Unit = {
     super.preStart()
-    connection ! Write(PingMessageComposer.compose())
+    connection ! Write(HelloMessageComposer.compose())
   }
 
   override def customReceive: Receive = {
