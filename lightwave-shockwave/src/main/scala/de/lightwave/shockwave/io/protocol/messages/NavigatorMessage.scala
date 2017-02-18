@@ -105,10 +105,10 @@ object LoadingAdvertisementDataComposer extends ShockwaveMessageComposer {
   */
 object RecommendedRoomListComposer extends ShockwaveMessageComposer {
   def compose(rooms: Seq[Room]): ByteString = {
-    val msg = init(OperationCode.Outgoing.RecommendedRoomList).push(rooms.length)
+    val listMessage = init(OperationCode.Outgoing.RecommendedRoomList).push(rooms.length)
 
     for (room <- rooms) {
-      msg.push(room.id.getOrElse(1))
+      listMessage.push(room.id.getOrElse(1))
          .push(room.name)
          .push("Steve") // owner
          .push("open") // room status
@@ -117,6 +117,6 @@ object RecommendedRoomListComposer extends ShockwaveMessageComposer {
          .push(room.description)
     }
 
-    msg.toByteString
+    listMessage.toByteString
   }
 }

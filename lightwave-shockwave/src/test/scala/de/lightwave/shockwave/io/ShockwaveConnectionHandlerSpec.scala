@@ -12,7 +12,7 @@ import de.lightwave.io.tcp.protocol.MessageHeader
 import de.lightwave.players.model.Player
 import de.lightwave.shockwave.io.ShockwaveConnectionHandler.{GetPlayerInformation, SetPlayerInformation}
 import de.lightwave.shockwave.io.protocol.OperationCode
-import de.lightwave.shockwave.io.protocol.messages.{PingMessageComposer, PongMessage}
+import de.lightwave.shockwave.io.protocol.messages.{HelloMessageComposer, PongMessage}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
 class ShockwaveConnectionHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.empty))
@@ -41,9 +41,9 @@ class ShockwaveConnectionHandlerSpec extends TestKit(ActorSystem("test-system", 
     }
   }
 
-  test("Receive initial ping") {
+  test("Receive initial hello message") {
     withActor() { (handler, connection, _) =>
-      connection.expectMsg(Write(PingMessageComposer.compose()))
+      connection.expectMsg(Write(HelloMessageComposer.compose()))
     }
   }
 
