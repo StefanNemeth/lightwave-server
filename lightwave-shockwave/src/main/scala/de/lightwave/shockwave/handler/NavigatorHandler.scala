@@ -5,15 +5,10 @@ import akka.io.Tcp.Write
 import akka.util.Timeout
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
 import de.lightwave.rooms.model.Room
+import de.lightwave.shockwave.io.ShockwaveConnectionHandler.EnterRoom
 import de.lightwave.shockwave.io.protocol.messages._
 
 class NavigatorHandler(roomRegion: ActorRef) extends Actor with ActorLogging {
-  import context.dispatcher
-  import akka.pattern._
-  import scala.concurrent.duration._
-
-  implicit val timeout = Timeout(5.seconds)
-
   override def receive = {
     case GetRecommendedRoomsMessage =>
       sender() ! Write(RecommendedRoomListMessageComposer.compose(Seq(NavigatorHandler.TestRoom)))
@@ -27,14 +22,26 @@ class NavigatorHandler(roomRegion: ActorRef) extends Actor with ActorLogging {
       sender() ! Write(FlatLetInMessageComposer.compose)
     case GoToFlatMessage(roomId) =>
       val replyTo = sender()
-      log.debug(s"Trying to enter room $roomId")
+      // Create room engine and pass it to the connection handler
+      // Timeout of 5 seconds
+      roomRegion.tell(InitializeRoom(NavigatorHandler.TestRoom), context.actorOf(Props(new Actor {
+        import scala.concurrent.duration._
+        import context.dispatcher
 
-      (roomRegion ? InitializeRoom(NavigatorHandler.TestRoom)).foreach {
-        case Initialized | AlreadyInitialized =>
-          sender() ! Write(RoomReadyMessageComposer.compose(
-            NavigatorHandler.TestRoom.modelId.getOrElse("model_a"), NavigatorHandler.TestRoom.id.getOrElse(1)
-          ))
-      }
+        override def preStart(): Unit = {
+          context.system.scheduler.scheduleOnce(5.seconds, self, "")
+        }
+
+        def receive: Receive = {
+          case Initialized | AlreadyInitialized =>
+            replyTo ! EnterRoom(sender())
+            replyTo ! Write(RoomReadyMessageComposer.compose(
+              NavigatorHandler.TestRoom.modelId.getOrElse("model_a"), NavigatorHandler.TestRoom.id.getOrElse(1)
+            ))
+            context.stop(self)
+          case _ => context.stop(self)
+        }
+      })))
   }
 }
 
