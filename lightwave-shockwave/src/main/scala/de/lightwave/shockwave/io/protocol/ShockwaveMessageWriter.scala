@@ -25,6 +25,11 @@ class ShockwaveMessageWriter(opCode: Short) extends MessageWriter(opCode) {
     this
   }
 
+  def push(bs: ByteString): MessageWriter = {
+    messageStream.write(bs.toArray)
+    this
+  }
+
   /**
     * Write byte
     */

@@ -12,8 +12,8 @@ import de.lightwave.shockwave.io.ShockwaveConnectionHandler
   * Front-end server which provides game access to Habbo shockwave
   * clients of version v?
   */
-class ShockwaveService(endpoint: InetSocketAddress, playerService: ActorRef) extends Service with ActorLogging {
-  val messageHandler: ActorRef = context.actorOf(MessageHandler.props(playerService), "MessageHandler")
+class ShockwaveService(endpoint: InetSocketAddress, playerService: ActorRef, roomRegion: ActorRef) extends Service with ActorLogging {
+  val messageHandler: ActorRef = context.actorOf(MessageHandler.props(playerService, roomRegion), "MessageHandler")
   val tcpServer: ActorRef = context.actorOf(TcpServer.props(endpoint, ShockwaveConnectionHandler.props(messageHandler)))
 
   override def receive: Receive = {
@@ -22,5 +22,6 @@ class ShockwaveService(endpoint: InetSocketAddress, playerService: ActorRef) ext
 }
 
 object ShockwaveService {
-  def props(endpoint: InetSocketAddress, playerService: ActorRef): Props = Props(classOf[ShockwaveService], endpoint, playerService)
+  def props(endpoint: InetSocketAddress, playerService: ActorRef, roomRegion: ActorRef): Props =
+    Props(classOf[ShockwaveService], endpoint, playerService, roomRegion)
 }

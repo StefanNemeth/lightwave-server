@@ -13,6 +13,9 @@ object OperationCode {
     val FlatInformation: Short = 54
     val RecommendedRoomList: Short = 351
     val LoadingAdvertisementData: Short = 258
+    val InitiateRoomLoading: Short = 19
+    val FlatLetIn: Short = 41
+    val RoomReady: Short = 69
   }
 
   object Incoming {
@@ -25,5 +28,8 @@ object OperationCode {
     val Navigate: Short = 150
     val GetRecommendedRooms: Short = 264
     val GetLoadingAdvertisement: Short = 182
+    val RoomDirectory: Short = 2
+    val TryFlat: Short = 57
+    val GoToFlat: Short = 59
   }
 }

@@ -25,7 +25,7 @@ object RoomServiceApp extends ServiceApp {
     ClusterSharding(system).start(
       typeName = RoomEngine.shardName,
       entityProps = RoomEngine.props(),
-      settings = ClusterShardingSettings(system),
+      settings = ClusterShardingSettings(system).withRole(role),
       extractEntityId = RoomEngine.extractEntityId,
       extractShardId = RoomEngine.extractShardId)
 

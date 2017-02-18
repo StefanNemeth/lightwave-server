@@ -13,7 +13,8 @@ trait ShockwaveMessage extends Message
 object ShockwaveMessageParser extends MessageParserLibrary {
   private var parsers: Array[MessageParser[_]] = Array(
     PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser,
-    GetFlatInformationMessageParser, NavigateMessageParser, GetRecommendedRoomsParser, GetLoadingAdvertisementParser
+    GetFlatInformationMessageParser, NavigateMessageParser, GetRecommendedRoomsMessageParser, GetLoadingAdvertisementMessageParser,
+    RoomDirectoryMessageParser, TryFlatMessageParser, GoToFlatMessageParser
   )
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =
@@ -44,5 +45,5 @@ trait ShockwaveMessageParser[T] extends MessageParser[T] {
 }
 
 trait ShockwaveMessageComposer {
-  def init(opCode: Short): MessageWriter = new ShockwaveMessageWriter(opCode)
+  def init(opCode: Short): ShockwaveMessageWriter = new ShockwaveMessageWriter(opCode)
 }

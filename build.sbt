@@ -11,6 +11,14 @@ lazy val lightwaveCommon = Project(
   settings(Commons.settings: _*).
   settings(libraryDependencies ++= commonDependencies)
 
+lazy val lightwavePlayers = Project(
+  id = "lightwave-players",
+  base = file("lightwave-players")).
+  enablePlugins(JavaAppPackaging).
+  settings(Commons.settings: _*).
+  settings(libraryDependencies ++= commonDependencies).
+  dependsOn(lightwaveCommon)
+
 lazy val lightwaveRooms = Project(
   id = "lightwave-rooms",
   base = file("lightwave-rooms")).
@@ -20,15 +28,8 @@ lazy val lightwaveRooms = Project(
   settings(
     mainClass in Compile := Some("de.lightwave.rooms.RoomServiceApp")
   ).
-  dependsOn(lightwaveCommon)
-
-lazy val lightwavePlayers = Project(
-  id = "lightwave-players",
-  base = file("lightwave-players")).
-  enablePlugins(JavaAppPackaging).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= commonDependencies).
-  dependsOn(lightwaveCommon)
+  dependsOn(lightwaveCommon).
+  dependsOn(lightwavePlayers) // Fix strange error (ClassNotFound ?!)
 
 lazy val lightwaveShockwave = Project(
   id = "lightwave-shockwave",

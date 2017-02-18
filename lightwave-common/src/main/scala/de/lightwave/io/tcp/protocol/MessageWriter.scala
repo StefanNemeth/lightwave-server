@@ -8,6 +8,7 @@ import akka.util.ByteString
   */
 abstract class MessageWriter(opCode: Short) {
   def push(s: String): MessageWriter
+  def push(bs: ByteString): MessageWriter
   def push(b: Byte): MessageWriter
   def push(i: Int): MessageWriter
   def push(b: Boolean): MessageWriter

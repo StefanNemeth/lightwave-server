@@ -5,8 +5,47 @@ import de.lightwave.io.tcp.protocol.MessageHeader
 import de.lightwave.rooms.model.Room
 import de.lightwave.rooms.model.Rooms.RoomId
 import de.lightwave.shockwave.io.protocol._
+import de.lightwave.shockwave.io.protocol.messages.InitiateRoomLoadingMessageComposer.init
 
 trait NavigatorMessage extends ShockwaveMessage
+
+/**
+  * Last call for entering a room
+  */
+case class GoToFlatMessage(roomId: RoomId) extends NavigatorMessage
+
+object GoToFlatMessageParser extends ShockwaveMessageParser[GoToFlatMessage] {
+  val opCode = OperationCode.Incoming.GoToFlat
+  override def parse(reader: ShockwaveMessageReader) = try {
+    GoToFlatMessage(reader.body.utf8String.toInt)
+  } catch {
+    case _:NumberFormatException => GoToFlatMessage(0)
+  }
+}
+/**
+  * Check whether client may enter the room
+  */
+case class TryFlatMessage(roomId: RoomId) extends NavigatorMessage
+
+object TryFlatMessageParser extends ShockwaveMessageParser[TryFlatMessage] {
+  val opCode = OperationCode.Incoming.TryFlat
+  override def parse(reader: ShockwaveMessageReader) = try {
+    TryFlatMessage(reader.body.utf8String.toInt)
+  } catch {
+    case _:NumberFormatException => TryFlatMessage(0)
+  }
+}
+
+/**
+  * Sent when client opens room in navigator before
+  * starting off room loading (room is full?)
+  */
+case class RoomDirectoryMessage(roomId: RoomId) extends NavigatorMessage
+
+object RoomDirectoryMessageParser extends ShockwaveMessageParser[RoomDirectoryMessage] {
+  val opCode = OperationCode.Incoming.RoomDirectory
+  override def parse(reader: ShockwaveMessageReader) = RoomDirectoryMessage(reader.readInt)
+}
 
 /**
   * Navigate to specific tab of navigator or reload
@@ -28,7 +67,7 @@ object NavigateMessageParser extends ShockwaveMessageParser[NavigatorMessage] {
   */
 case object GetRecommendedRoomsMessage extends NavigatorMessage
 
-object GetRecommendedRoomsParser extends ShockwaveMessageParser[GetRecommendedRoomsMessage.type] {
+object GetRecommendedRoomsMessageParser extends ShockwaveMessageParser[GetRecommendedRoomsMessage.type] {
   val opCode = OperationCode.Incoming.GetRecommendedRooms
   override def parse(reader: ShockwaveMessageReader) = GetRecommendedRoomsMessage
 }
@@ -39,7 +78,7 @@ object GetRecommendedRoomsParser extends ShockwaveMessageParser[GetRecommendedRo
   */
 case object GetLoadingAdvertisementMessage extends NavigatorMessage
 
-object GetLoadingAdvertisementParser extends ShockwaveMessageParser[GetLoadingAdvertisementMessage.type] {
+object GetLoadingAdvertisementMessageParser extends ShockwaveMessageParser[GetLoadingAdvertisementMessage.type] {
   val opCode = OperationCode.Incoming.GetLoadingAdvertisement
   override def parse(reader: ShockwaveMessageReader) = GetLoadingAdvertisementMessage
 }
@@ -93,7 +132,7 @@ object FlatInformationMessageComposer extends ShockwaveMessageComposer {
   * Set image and link that is displayed when loading a room
   * Currently disabled! (STR IMG + TAB + LINK)
   */
-object LoadingAdvertisementDataComposer extends ShockwaveMessageComposer {
+object LoadingAdvertisementDataMessageComposer extends ShockwaveMessageComposer {
   def compose(): ByteString = init(OperationCode.Outgoing.LoadingAdvertisementData)
     .push('0'.toByte)
     .toByteString
@@ -103,7 +142,7 @@ object LoadingAdvertisementDataComposer extends ShockwaveMessageComposer {
   * Response to GetRecommendedRooms
   * Represents rooms that are recommended to the user (probably most active rooms)
   */
-object RecommendedRoomListComposer extends ShockwaveMessageComposer {
+object RecommendedRoomListMessageComposer extends ShockwaveMessageComposer {
   def compose(rooms: Seq[Room]): ByteString = {
     val listMessage = init(OperationCode.Outgoing.RecommendedRoomList).push(rooms.length)
 
@@ -119,4 +158,27 @@ object RecommendedRoomListComposer extends ShockwaveMessageComposer {
 
     listMessage.toByteString
   }
+}
+
+/**
+  * Marks room requested in RoomDirectoryMessage as enterable
+  */
+object InitiateRoomLoadingMessageComposer extends ShockwaveMessageComposer {
+  val compose: ByteString = init(OperationCode.Outgoing.InitiateRoomLoading).toByteString
+}
+
+/**
+  * Grands access to a private room
+  */
+object FlatLetInMessageComposer extends ShockwaveMessageComposer {
+  val compose: ByteString = init(OperationCode.Outgoing.FlatLetIn).toByteString
+}
+
+/**
+  * Tells client that requested room has been started
+  */
+object RoomReadyMessageComposer extends ShockwaveMessageComposer {
+  def compose(model: String, roomId: RoomId): ByteString = init(OperationCode.Outgoing.RoomReady)
+    .push(ByteString.fromString(model + " " + roomId))
+    .toByteString
 }
