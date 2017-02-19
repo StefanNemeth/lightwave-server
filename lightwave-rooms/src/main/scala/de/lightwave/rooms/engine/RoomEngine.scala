@@ -7,13 +7,18 @@ import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.sharding.ShardRegion
 import de.lightwave.rooms.engine.EngineComponent.Initialize
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
-import de.lightwave.rooms.engine.entities.EntityDirector
+import de.lightwave.rooms.engine.entities.{EntityDirector, RoomEntity}
 import de.lightwave.rooms.engine.entities.EntityDirector.{GetEntity, SpawnEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.model.Room
 import de.lightwave.services.pubsub.Broadcaster
 import de.lightwave.services.pubsub.Broadcaster.{Subscribe, Unsubscribe}
+
+/**
+  * Event concerning the room that can be broadcasted
+  */
+trait RoomEvent
 
 /**
   * Central part of the room engine managing all objects and live-states
@@ -56,6 +61,7 @@ class RoomEngine(mapCoordinatorProps: Props, entityDirectorProps: ((ActorRef, Ac
     case msg @ Subscribe(ref) => broadcaster forward msg
     case msg @ Unsubscribe(ref) => broadcaster forward msg
     case msg @ GetAbsoluteHeightMap => mapCoordinator forward msg
+    case msg @ RoomEntity.GetRenderInformation => entityDirector forward msg
   }
 }
 

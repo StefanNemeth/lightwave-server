@@ -21,6 +21,7 @@ object OperationCode {
     val PublicObjects: Short = 30
     val FloorItems: Short = 32
     val WallItems: Short = 45
+    val EntityStance: Short = 34
   }
 
   object Incoming {
@@ -40,5 +41,6 @@ object OperationCode {
     val GetUsers: Short = 61
     val GetObjects: Short = 62
     val GetItems: Short = 63
+    val GetUserStances: Short = 64
   }
 }

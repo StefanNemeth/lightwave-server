@@ -15,7 +15,7 @@ object ShockwaveMessageParser extends MessageParserLibrary {
     PongMessageParser, InitCryptoMessageParser, GenerateKeyMessageParser, LoginMessageParser, GetPlayerInfoMessageParser,
     GetFlatInformationMessageParser, NavigateMessageParser, GetRecommendedRoomsMessageParser, GetLoadingAdvertisementMessageParser,
     RoomDirectoryMessageParser, TryFlatMessageParser, GoToFlatMessageParser, GetHeightmapMessageParser, GetUsersMessageParser,
-    GetObjectsMessageParser, GetItemsMessageParser
+    GetObjectsMessageParser, GetItemsMessageParser, GetUserStancesMessageParser
   )
 
   private var parsersByOpCode: Map[Short, MessageParser[_]] =

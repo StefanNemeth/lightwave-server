@@ -1,9 +1,12 @@
 package de.lightwave.shockwave.handler
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.io.Tcp.Write
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
-import de.lightwave.shockwave.io.protocol.messages.GetHeightmapMessage
+import de.lightwave.migration.ShockwaveMigration
+import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
+import de.lightwave.shockwave.io.protocol.messages.{GetHeightmapMessage, HeightmapMessageComposer}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
 class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.empty))
@@ -13,14 +16,21 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
   with BeforeAndAfterAll {
 
   test("Get heightmap") {
-    withActor() { (handler, engine) =>
+    withActor() { (handler, connection, engine) =>
+      val map = IndexedSeq(IndexedSeq(None))
       handler ! GetHeightmapMessage
+
+      engine.expectMsg(GetAbsoluteHeightMap)
+      engine.reply(map)
+
+      connection.expectMsg(Write(HeightmapMessageComposer.compose(map)))
     }
   }
 
-  private def withActor()(testCode: (ActorRef, TestProbe) => Any) = {
+  private def withActor()(testCode: (ActorRef, TestProbe, TestProbe) => Any) = {
+    val connection = TestProbe()
     val roomEngine = TestProbe()
 
-    testCode(system.actorOf(RoomHandler.props(roomEngine.ref)), roomEngine)
+    testCode(system.actorOf(RoomHandler.props(connection.ref, roomEngine.ref)), connection, roomEngine)
   }
 }

@@ -2,15 +2,17 @@ package de.lightwave.rooms.engine.entities
 
 import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.util.Timeout
-import de.lightwave.rooms.engine.EngineComponent
+import de.lightwave.rooms.engine.{EngineComponent, RoomEvent}
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
 import de.lightwave.rooms.engine.entities.EntityDirector._
-import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
+import de.lightwave.rooms.engine.entities.RoomEntity.{GetRenderInformation, TeleportTo}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetDoorPosition
 import de.lightwave.rooms.engine.mapping.Vector2
 import de.lightwave.services.pubsub.Broadcaster.Publish
 
 import scala.collection.mutable
+
+trait EntityEvent extends RoomEvent
 
 /**
   * Engine component which is responsible for spawning and removing entities such as
@@ -27,7 +29,7 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
   var idGenerator: Int = 0
 
   // Spawn new entities here
-  var spawnPosition: Vector2 = Vector2(0, 0)
+  var spawnPosition: Option[Vector2] = None
 
   /**
     * Generates a new entity id and spawns an entity assigned to it
@@ -35,7 +37,7 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
     *
     * @return Reference to entity
     */
-  def spawnEntity(reference: EntityReference): ActorRef = {
+  def spawnEntity(reference: EntityReference, position: Vector2): ActorRef = {
     val entityId = { idGenerator += 1; idGenerator }
     val entity = context.actorOf(RoomEntity.props(entityId, reference)(mapCoordinator, broadcaster))
 
@@ -43,8 +45,8 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
     broadcaster ! Publish(EntitySpawned(entityId, reference, entity))
 
     log.debug(s"Spawning new entity '${reference.name}'")
+    entity ! TeleportTo(position)
 
-    entity ! TeleportTo(spawnPosition)
     entity
   }
 
@@ -64,17 +66,31 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
   def initializedReceive: Receive = {
     case Initialize(_) => sender() ! AlreadyInitialized
     case GetEntity(id) => sender() ! entities.get(id)
-    case SpawnEntity(reference) => sender() ! spawnEntity(reference)
-    case SetSpawnPosition(position) => spawnPosition = position
+    case SpawnEntityAt(reference, pos) => sender() ! spawnEntity(reference, pos)
+    case SpawnEntity(reference) =>
+      val replyTo = sender()
+      // Get spawn position, if not found fetch it (usually when the room is getting
+      // loaded)
+      spawnPosition match {
+        case None => (mapCoordinator ? GetDoorPosition)(Timeout(3.seconds)).mapTo[Vector2].foreach((position: Vector2) => {
+          self ! SetSpawnPosition(position)
+          self.tell(SpawnEntityAt(reference, position), replyTo)
+        })
+        case Some(spawn) => self.tell(SpawnEntityAt(reference, spawn), replyTo)
+      }
+    case SetSpawnPosition(position) => spawnPosition = Some(position)
+    // Get render information of all entities and forward them to the sender
+    case cmd @ GetRenderInformation => entities.values.foreach(_ forward cmd)
   }
 }
 
 object EntityDirector {
   case class GetEntity(id: Int)
   case class SpawnEntity(reference: EntityReference)
+  case class SpawnEntityAt(reference: EntityReference, pos: Vector2)
   case class SetSpawnPosition(position: Vector2)
 
-  case class EntitySpawned(id: Int, reference: EntityReference, entity: ActorRef)
+  case class EntitySpawned(id: Int, reference: EntityReference, entity: ActorRef) extends EntityEvent
 
   def props()(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[EntityDirector], mapCoordinator, broadcaster)
 }

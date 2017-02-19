@@ -11,6 +11,7 @@ class MessageHandler(playerService: ActorRef, roomRegion: ActorRef) extends Acto
   val frontpageHandler: ActorRef = context.actorOf(FrontpageHandler.props(playerService), "Frontpage")
   val navigatorHandler: ActorRef = context.actorOf(NavigatorHandler.props(roomRegion) ,"Navigator")
 
+  // TODO: Check if user is logged in
   override def receive: Receive = {
     case e:HandshakeMessage => handshakeHandler forward e
     case e:FrontpageMessage => frontpageHandler forward e

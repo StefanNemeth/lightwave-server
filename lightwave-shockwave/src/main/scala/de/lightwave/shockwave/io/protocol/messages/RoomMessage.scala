@@ -1,6 +1,10 @@
 package de.lightwave.shockwave.io.protocol.messages
 
 import akka.util.ByteString
+import de.lightwave.migration.ShockwaveMigration
+import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance}
+import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
+import de.lightwave.rooms.engine.mapping.Vector3
 import de.lightwave.shockwave.io.protocol._
 
 /**
@@ -50,31 +54,63 @@ object GetItemsMessageParser extends ShockwaveMessageParser[GetItemsMessage.type
   override def parse(reader: ShockwaveMessageReader) = GetItemsMessage
 }
 
+/**
+  * Get user stances: Their direction, whether they dance etc.
+  */
+case object GetUserStancesMessage extends RoomMessage
+
+object GetUserStancesMessageParser extends ShockwaveMessageParser[GetUserStancesMessage.type] {
+  val opCode = OperationCode.Incoming.GetUserStances
+  override def parse(reader: ShockwaveMessageReader) = GetUserStancesMessage
+}
+
 
 /**
   * Send heightmap of room to client
   */
 object HeightmapMessageComposer extends ShockwaveMessageComposer {
-  def compose(heightmap: String): ByteString = init(OperationCode.Outgoing.Heightmap)
-    .push(heightmap)
+  def compose(heightmap: StaticMap[Double]): ByteString = init(OperationCode.Outgoing.Heightmap)
+    .push(ByteString.fromString(ShockwaveMigration.composeMap(heightmap)))
     .toByteString
 }
 
 /**
-  * TODO: Send entities that are currently in the room
-  * to the client
+  * Display entities that are currently in the room
+  * TODO: Add figure, mission, gender
   */
 object EntityListMessageComposer extends ShockwaveMessageComposer {
-  def compose(): ByteString = init(OperationCode.Outgoing.EntityList)
-    //.push("i:1\na:1\nn:Steve\nf:\nl:3 5 0.0\nc:Hey\n")
+  def compose(entities: Seq[(Int, EntityReference, Vector3)]): ByteString = {
+    val msg = init(OperationCode.Outgoing.EntityList)
+    entities.foreach {
+      case (virtualId, EntityReference(id, name), Vector3(x, y, z)) => // TODO: Filter!
+        msg.push(ByteString.fromString(
+          s"i:$virtualId\r" +
+          s"a:$id\r" +
+          s"n:${ShockwaveMessageWriter.filterString(name).replaceAll(" ", "")}\r" +
+          s"f:8530319002255042801529510014400\r" +
+          s"l:$x $y $z\r" +
+          s"c:Test mission\r" +
+          s"s:M\r"
+        ))
+    }
+    msg.toByteString
+  }
+}
+
+/**
+  * Update stance of a specific entity TODO: Add status thing
+  */
+object EntityStanceMessageComposer extends ShockwaveMessageComposer {
+  def compose(virtualId: Int, stance: EntityStance): ByteString = init(OperationCode.Outgoing.EntityStance)
+    .push(ByteString.fromString(s"$virtualId ${stance.pos.x},${stance.pos.y},${stance.pos.z},${stance.headDirection},${stance.bodyDirection}//\r"))
     .toByteString
 }
 
 /**
-  * TODO: Let the client display public room objects
+  * TODO: Display public room objects
   */
 object PublicObjectsMessageComposer extends ShockwaveMessageComposer {
-  def compose(): ByteString = init(OperationCode.Outgoing.PublicObjects).push(0).toByteString
+  def compose(): ByteString = init(OperationCode.Outgoing.PublicObjects).toByteString
 }
 
 /**

@@ -39,7 +39,7 @@ class ShockwaveConnectionHandler(remoteAddress: InetSocketAddress, connection: A
     case SetPlayerInformation(player) => playerInformation = Some(player)
     case GetPlayerInformation => sender() ! playerInformation
     case EnterRoom(engine) => roomHandler = Some(
-      context.actorOf(RoomHandler.props(engine))
+      context.actorOf(RoomHandler.props(self, engine))
     )
   }
 }
