@@ -15,7 +15,7 @@ import de.lightwave.shockwave.io.protocol.{ShockwaveMessageHeader, ShockwaveMess
   * Handler of clients that are connected to the shockwave server.
   */
 class ShockwaveConnectionHandler(remoteAddress: InetSocketAddress, connection: ActorRef, messageHandler: ActorRef)
-  extends ConnectionHandler(remoteAddress, connection, ShockwaveMessageHeader, ShockwaveMessageParser, messageHandler) {
+  extends ConnectionHandler(remoteAddress, connection, ShockwaveMessageHeader, ShockwaveMessageParser) {
 
   import akka.io.Tcp._
 
@@ -29,10 +29,10 @@ class ShockwaveConnectionHandler(remoteAddress: InetSocketAddress, connection: A
 
   override def handleMessage(msg: Any): Unit = msg match {
     case e:RoomMessage if roomHandler.isDefined => roomHandler match {
-      case Some(handler) => handler forward e
+      case Some(handler) => handler ! e
       case None => // Ignore if no room handler set
     }
-    case _ => super.handleMessage(msg)
+    case e => messageHandler ! e
   }
 
   override def customReceive: Receive = {

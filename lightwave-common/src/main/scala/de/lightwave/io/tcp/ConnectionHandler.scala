@@ -16,8 +16,7 @@ class ConnectionHandler(
   remoteAddress: InetSocketAddress,
   connection: ActorRef,
   messageHeaderParser: MessageHeaderParser,
-  messageParserLib: MessageParserLibrary,
-  messageHandler: ActorRef
+  messageParserLib: MessageParserLibrary
 ) extends Actor with ActorLogging {
 
   import akka.io.Tcp._
@@ -34,7 +33,7 @@ class ConnectionHandler(
     * Forward parsed message to message handler, can be
     * overridden for custom handling
     */
-  def handleMessage(msg: Any): Unit = messageHandler ! msg
+  def handleMessage(msg: Any): Unit = {}
 
   def receive(implicit collected: Option[(MessageHeader, ByteString)]): Receive = this.customReceive orElse {
     case Received(data) => receiveMessage(data, self)
@@ -104,5 +103,5 @@ object ConnectionHandler {
 
   case class MessageRead(header: MessageHeader, body: ByteString)
 
-  def props(remoteAddress: InetSocketAddress, connection: ActorRef, messageHandler: ActorRef) = Props(classOf[ConnectionHandler], remoteAddress, connection, messageHandler)
+  def props(remoteAddress: InetSocketAddress, connection: ActorRef) = Props(classOf[ConnectionHandler], remoteAddress, connection)
 }

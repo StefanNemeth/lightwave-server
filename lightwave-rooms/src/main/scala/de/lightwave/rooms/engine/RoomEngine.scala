@@ -50,14 +50,12 @@ class RoomEngine(mapCoordinatorProps: Props, entityDirectorProps: ((ActorRef, Ac
   def initializedReceive: Receive = {
     case InitializeRoom(_) => sender() ! AlreadyInitialized
 
-    case msg @ Subscribe(ref) =>
-      mapCoordinator.tell(GetAbsoluteHeightMap, ref)
-      broadcaster forward msg
-
     // Public API
     case msg @ SpawnEntity(_) => entityDirector forward msg
     case msg @ GetEntity(_) => entityDirector forward msg
+    case msg @ Subscribe(ref) => broadcaster forward msg
     case msg @ Unsubscribe(ref) => broadcaster forward msg
+    case msg @ GetAbsoluteHeightMap => mapCoordinator forward msg
   }
 }
 

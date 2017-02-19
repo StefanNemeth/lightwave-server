@@ -46,7 +46,7 @@ class NavigatorHandler(roomRegion: ActorRef) extends Actor with ActorLogging {
 }
 
 object NavigatorHandler {
-  val TestRoom = Room(Some(1), "Test room", "Test description", Some("model_a"))
+  val TestRoom = Room(Some(1), "Test room", "Test room", Some("model_a"))
 
   def props(roomRegion: ActorRef) = Props(classOf[NavigatorHandler], roomRegion)
 }

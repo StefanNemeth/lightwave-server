@@ -16,6 +16,11 @@ object OperationCode {
     val InitiateRoomLoading: Short = 19
     val FlatLetIn: Short = 41
     val RoomReady: Short = 69
+    val Heightmap: Short = 31
+    val EntityList: Short = 28
+    val PublicObjects: Short = 30
+    val FloorItems: Short = 32
+    val WallItems: Short = 45
   }
 
   object Incoming {
@@ -31,5 +36,9 @@ object OperationCode {
     val RoomDirectory: Short = 2
     val TryFlat: Short = 57
     val GoToFlat: Short = 59
+    val GetHeightmap: Short = 60
+    val GetUsers: Short = 61
+    val GetObjects: Short = 62
+    val GetItems: Short = 63
   }
 }
