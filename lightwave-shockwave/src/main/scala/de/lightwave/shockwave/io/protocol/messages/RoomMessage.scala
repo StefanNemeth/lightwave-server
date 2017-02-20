@@ -101,8 +101,8 @@ object EntityListMessageComposer extends ShockwaveMessageComposer {
   * Update stance of a specific entity TODO: Add status thing
   */
 object EntityStanceMessageComposer extends ShockwaveMessageComposer {
-  def compose(virtualId: Int, stance: EntityStance): ByteString = init(OperationCode.Outgoing.EntityStance)
-    .push(ByteString.fromString(s"$virtualId ${stance.pos.x},${stance.pos.y},${stance.pos.z},${stance.headDirection},${stance.bodyDirection}//\r"))
+  def compose(virtualId: Int, pos: Vector3, stance: EntityStance): ByteString = init(OperationCode.Outgoing.EntityStance)
+    .push(ByteString.fromString(s"$virtualId ${pos.x},${pos.y},${pos.z},${stance.headDirection},${stance.bodyDirection}//\r"))
     .toByteString
 }
 

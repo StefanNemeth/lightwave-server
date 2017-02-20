@@ -53,8 +53,8 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
 
     // Render entity that was requested by "GetUserStancesMessage"
     // Buffer them?
-    case (id: Int, reference: EntityReference, stance: EntityStance) =>
-      connection ! Write(EntityListMessageComposer.compose(Seq((id, reference, stance.pos))) ++ EntityStanceMessageComposer.compose(id, stance))
+    case RoomEntity.RenderInformation(id, reference, pos, stance) =>
+      connection ! Write(EntityListMessageComposer.compose(Seq((id, reference, pos))) ++ EntityStanceMessageComposer.compose(id, pos, stance))
   }
 }
 

@@ -4,10 +4,12 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
-import de.lightwave.rooms.engine.entities.EntityDirector.{GetEntity, SetSpawnPosition, SpawnEntity}
+import de.lightwave.rooms.engine.entities.EntityDirector._
+import de.lightwave.rooms.engine.entities.RoomEntity.GetPosition
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetDoorPosition
-import de.lightwave.rooms.engine.mapping.Vector2
+import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.rooms.repository.RoomRepositorySpec
+import de.lightwave.services.pubsub.Broadcaster.Publish
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
 class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactory.empty))
@@ -33,14 +35,33 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
     }
   }
 
-  test("Spawn entity") {
+  test("Spawn entity at specific position") {
     withActor() { director =>
       director ! Initialize(RoomRepositorySpec.expectedRoom)
       expectMsg(Initialized)
 
-      director ! SpawnEntity(EntityReference(""))
-      expectMsgClass(classOf[ActorRef])
+      director ! SpawnEntityAt(EntityReference(0, ""), new Vector2(1, 0))
+
+      val entity: ActorRef = expectMsgClass(classOf[ActorRef])
+
+      Thread.sleep(3000) // Wait until entity got teleported
+
+      entity ! GetPosition
+      expectMsg(new Vector3(1, 0, 0))
     }
+  }
+
+  test("Broadcast spawn of entity") {
+    val broadcaster = TestProbe()
+    val director = TestActorRef[EntityDirector](EntityDirector.props()(TestProbe().ref, broadcaster.ref))
+
+    director ! Initialize(RoomRepositorySpec.expectedRoom)
+    expectMsg(Initialized)
+
+    director ! SpawnEntityAt(EntityReference(0, ""), new Vector2(1, 0))
+    val entity: ActorRef = expectMsgClass(classOf[ActorRef])
+
+    broadcaster.expectMsg(Publish(EntitySpawned(1, EntityReference(0, ""), entity)))
   }
 
   test("Get entity by id") {
@@ -48,7 +69,7 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
       director ! Initialize(RoomRepositorySpec.expectedRoom)
       expectMsg(Initialized)
 
-      director ! SpawnEntity(EntityReference(""))
+      director ! SpawnEntityAt(EntityReference(0, ""), new Vector2(0, 0))
       expectMsgClass(classOf[ActorRef])
 
       director ! GetEntity(1)
@@ -63,7 +84,7 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
     expectMsg(Initialized)
 
     director ! SetSpawnPosition(Vector2(1, 1))
-    assert(director.underlyingActor.spawnPosition == Vector2(1, 1))
+    assert(director.underlyingActor.spawnPosition.contains(Vector2(1, 1)))
   }
 
   test("Set spawn position to door position on initialization") {
@@ -76,7 +97,24 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
     coordinatorProbe.expectMsg(GetDoorPosition)
     coordinatorProbe.reply(Vector2(1, 1))
 
-    assert(director.underlyingActor.spawnPosition == Vector2(1, 1))
+    assert(director.underlyingActor.spawnPosition.contains(Vector2(1, 1)))
+  }
+
+  test("Spawn entity at default position") {
+    val director = TestActorRef[EntityDirector](EntityDirector.props()(TestProbe().ref, TestProbe().ref))
+
+    director ! Initialize(RoomRepositorySpec.expectedRoom)
+    expectMsg(Initialized)
+
+    director ! SetSpawnPosition(Vector2(1, 1))
+    director ! SpawnEntity(EntityReference(0, ""))
+
+    val entity: ActorRef = expectMsgClass(classOf[ActorRef])
+
+    Thread.sleep(3000) // Wait until entity got teleported
+
+    entity ! GetPosition
+    expectMsg(new Vector3(1, 1, 0))
   }
 
   private def withActor()(testCode: ActorRef => Any): Unit = {
