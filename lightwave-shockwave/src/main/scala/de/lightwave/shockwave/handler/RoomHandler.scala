@@ -33,6 +33,8 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
   def messageReceive: Receive = {
     case GetHeightmapMessage => (roomEngine ? GetAbsoluteHeightMap).map {
       case map:IndexedSeq[_] => Write(HeightmapMessageComposer.compose(map.asInstanceOf[StaticMap[Double]]))
+    }.recover {
+      case _ => Write(HeightmapMessageComposer.compose(IndexedSeq.empty))
     } pipeTo connection
     case GetUsersMessage =>
       connection ! Write(EntityListMessageComposer.compose(Seq.empty))

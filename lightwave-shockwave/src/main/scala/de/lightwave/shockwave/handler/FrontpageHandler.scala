@@ -18,7 +18,9 @@ class FrontpageHandler(playerService: ActorRef) extends Actor with ActorLogging 
   override def receive = {
     case LoginMessage(username, password) =>
       val replyTo = sender()
-      val loginFuture = (playerService ? AuthenticatePlayer(username, password)).mapTo[Option[Player]]
+      val loginFuture = (playerService ? AuthenticatePlayer(username, password)).mapTo[Option[Player]].recover {
+        case _ => None // Show invalid username/password on timeout (change it?)
+      }
 
       loginFuture foreach {
         case Some(player) => loginPlayer(replyTo, player)
@@ -28,7 +30,9 @@ class FrontpageHandler(playerService: ActorRef) extends Actor with ActorLogging 
     case GetPlayerInformationMessage =>
       val replyTo = sender()
 
-      (replyTo ? GetPlayerInformation).mapTo[Option[Player]].foreach {
+      (replyTo ? GetPlayerInformation).mapTo[Option[Player]].recover {
+        case _ => None
+      }.foreach {
         case Some(player) => replyTo ! Write(PlayerInformationMessageComposer.compose(player))
         case None => log.warning("Unauthenticated client trying to fetch player information.")
       }

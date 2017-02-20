@@ -72,7 +72,9 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
       // Get spawn position, if not found fetch it (usually when the room is getting
       // loaded)
       spawnPosition match {
-        case None => (mapCoordinator ? GetDoorPosition)(Timeout(3.seconds)).mapTo[Vector2].foreach((position: Vector2) => {
+        case None => (mapCoordinator ? GetDoorPosition) (Timeout(3.seconds)).mapTo[Vector2].recover {
+          case _ => new Vector2(0, 0)
+        }.foreach((position: Vector2) => {
           self ! SetSpawnPosition(position)
           self.tell(SpawnEntityAt(reference, position), replyTo)
         })
