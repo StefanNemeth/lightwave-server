@@ -8,6 +8,7 @@ import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
 import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
+import de.lightwave.rooms.engine.mapping.Vector3
 import de.lightwave.services.pubsub.Broadcaster.Subscribe
 import de.lightwave.shockwave.handler.RoomHandler.SetEntity
 import de.lightwave.shockwave.io.protocol.messages._
@@ -45,7 +46,10 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
   }
 
   def eventReceive: Receive = {
-    case e:RoomEvent => println(e)
+    case RoomEntity.Spawned(id, reference, _) =>
+      connection ! Write(EntityListMessageComposer.compose(Seq((id, reference, new Vector3(0, 0, 0)))))
+    case RoomEntity.PositionUpdated(id, pos, stance) =>
+      connection ! Write(EntityStanceMessageComposer.compose(id, pos, stance))
   }
 
   override def receive: Receive = messageReceive orElse eventReceive orElse {

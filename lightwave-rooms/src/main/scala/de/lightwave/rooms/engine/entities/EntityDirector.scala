@@ -42,7 +42,7 @@ class EntityDirector(mapCoordinator: ActorRef, broadcaster: ActorRef) extends En
     val entity = context.actorOf(RoomEntity.props(entityId, reference)(mapCoordinator, broadcaster))
 
     entities += (entityId -> entity)
-    broadcaster ! Publish(EntitySpawned(entityId, reference, entity))
+    broadcaster ! Publish(RoomEntity.Spawned(entityId, reference, entity))
 
     log.debug(s"Spawning new entity '${reference.name}'")
     entity ! TeleportTo(position)
@@ -89,8 +89,6 @@ object EntityDirector {
   case class SpawnEntity(reference: EntityReference)
   case class SpawnEntityAt(reference: EntityReference, pos: Vector2)
   case class SetSpawnPosition(position: Vector2)
-
-  case class EntitySpawned(id: Int, reference: EntityReference, entity: ActorRef) extends EntityEvent
 
   def props()(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[EntityDirector], mapCoordinator, broadcaster)
 }

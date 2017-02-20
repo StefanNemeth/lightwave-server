@@ -25,7 +25,7 @@ class RoomEntitySpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
   test("Broadcast new position") {
     withActor() { (entity, _, broadcaster) =>
       entity ! SetPosition(Vector3(1, 1, 1))
-      broadcaster.expectMsg(Publish(PositionUpdated(1, Vector3(1, 1, 1))))
+      broadcaster.expectMsg(Publish(PositionUpdated(1, Vector3(1, 1, 1), EntityStance(2, 2))))
     }
   }
 

@@ -61,7 +61,7 @@ class EntityDirectorSpec extends TestKit(ActorSystem("test-system", ConfigFactor
     director ! SpawnEntityAt(EntityReference(0, ""), new Vector2(1, 0))
     val entity: ActorRef = expectMsgClass(classOf[ActorRef])
 
-    broadcaster.expectMsg(Publish(EntitySpawned(1, EntityReference(0, ""), entity)))
+    broadcaster.expectMsg(Publish(RoomEntity.Spawned(1, EntityReference(0, ""), entity)))
   }
 
   test("Get entity by id") {

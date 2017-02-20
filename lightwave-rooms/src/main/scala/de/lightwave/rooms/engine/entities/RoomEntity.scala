@@ -23,6 +23,7 @@ class RoomEntity(id: Int, var reference: EntityReference, mapCoordinator: ActorR
   import context.dispatcher
 
   var position = new Vector3(0, 0, 0.0)
+  var stance = EntityStance(2, 2)
 
   override def receive: Receive = {
     case TeleportTo(pos) =>
@@ -36,9 +37,9 @@ class RoomEntity(id: Int, var reference: EntityReference, mapCoordinator: ActorR
 
     case SetPosition(pos) =>
       position = pos
-      broadcaster ! Publish(PositionUpdated(id, pos))
+      broadcaster ! Publish(PositionUpdated(id, pos, stance))
 
-    case GetRenderInformation => sender() ! RenderInformation(id, reference, position, EntityStance(2, 2))
+    case GetRenderInformation => sender() ! RenderInformation(id, reference, position, stance)
     case GetPosition => sender() ! position
   }
 }
@@ -65,7 +66,8 @@ object RoomEntity {
     */
   case class RenderInformation(virtualId: Int, reference: EntityReference, position: Vector3, stance: EntityStance)
 
-  case class PositionUpdated(id: Int, pos: Vector3) extends EntityEvent
+  case class PositionUpdated(id: Int, pos: Vector3, stance: EntityStance) extends EntityEvent
+  case class Spawned(id: Int, reference: EntityReference, entity: ActorRef)
 
   def props(id: Int, reference: EntityReference)(mapCoordinator: ActorRef, broadcaster: ActorRef) = Props(classOf[RoomEntity], id, reference, mapCoordinator, broadcaster)
 }

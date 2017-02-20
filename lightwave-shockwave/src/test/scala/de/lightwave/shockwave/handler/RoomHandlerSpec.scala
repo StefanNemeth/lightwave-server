@@ -80,6 +80,20 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     }
   }
 
+  test("Display new entity on spawn event") {
+    withActor() { (handler, connection, _) =>
+      handler ! RoomEntity.Spawned(1, EntityReference(1, "Steve"), TestProbe().ref)
+      connection.expectMsg(Write(EntityListMessageComposer.compose(Seq((1, EntityReference(1, "Steve"), new Vector3(0, 0, 0))))))
+    }
+  }
+
+  test("Update entity stance on position update event") {
+    withActor() { (handler, connection, _) =>
+      handler ! RoomEntity.PositionUpdated(1, new Vector3(1, 1, 1), EntityStance(2, 2))
+      connection.expectMsg(Write(EntityStanceMessageComposer.compose(1, new Vector3(1, 1, 1), EntityStance(2, 2))))
+    }
+  }
+
   private def withActor(handleStartup: Boolean = true)(testCode: (ActorRef, TestProbe, TestProbe) => Any) = {
     val connection = TestProbe()
     val roomEngine = TestProbe()
