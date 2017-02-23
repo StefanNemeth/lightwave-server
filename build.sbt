@@ -28,8 +28,7 @@ lazy val lightwaveRooms = Project(
   settings(
     mainClass in Compile := Some("de.lightwave.rooms.RoomServiceApp")
   ).
-  dependsOn(lightwaveCommon).
-  dependsOn(lightwavePlayers) // Fix strange error (ClassNotFound ?!)
+  dependsOn(lightwaveCommon)
 
 lazy val lightwaveShockwave = Project(
   id = "lightwave-shockwave",
