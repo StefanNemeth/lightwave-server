@@ -38,13 +38,12 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
     } pipeTo connection
     case GetUsersMessage =>
       connection ! Write(EntityListMessageComposer.compose(Seq.empty))
+      roomEngine ! RoomEntity.GetRenderInformation
     case GetObjectsMessage =>
       connection ! Write(PublicObjectsMessageComposer.compose())
       connection ! Write(FloorItemsMessageComposer.compose())
     case GetItemsMessage =>
       connection ! Write(WallItemsMessageComposer.compose())
-    case GetUserStancesMessage =>
-      roomEngine ! RoomEntity.GetRenderInformation
   }
 
   def eventReceive: Receive = {

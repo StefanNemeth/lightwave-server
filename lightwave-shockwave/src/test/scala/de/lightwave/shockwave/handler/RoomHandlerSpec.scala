@@ -44,10 +44,20 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     }
   }
 
-  test("Get placeholder user list for continuing loading") {
-    withActor() { (handler, connection, _) =>
+  test("Render all entities") {
+    withActor() { (handler, connection, engine) =>
+      val renderInfo = RoomEntity.RenderInformation(1, EntityReference(1, "Steve"), new Vector3(1, 1, 0), EntityStance(2, 2))
       handler ! GetUsersMessage
+
+      // Placeholder list (required by client)
       connection.expectMsg(Write(EntityListMessageComposer.compose(Seq.empty)))
+
+      engine.expectMsg(RoomEntity.GetRenderInformation)
+      engine.reply(renderInfo)
+
+      connection.expectMsg(Write(EntityListMessageComposer.compose(
+        Seq((renderInfo.virtualId, renderInfo.reference, renderInfo.position))
+      ) ++ EntityStanceMessageComposer.compose(renderInfo.virtualId, renderInfo.position, renderInfo.stance)))
     }
   }
 
@@ -63,20 +73,6 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     withActor() { (handler, connection, _) =>
       handler ! GetItemsMessage
       connection.expectMsg(Write(WallItemsMessageComposer.compose()))
-    }
-  }
-
-  test("Render all entities") {
-    withActor() { (handler, connection, engine) =>
-      val renderInfo = RoomEntity.RenderInformation(1, EntityReference(1, "Steve"), new Vector3(1, 1, 0), EntityStance(2, 2))
-      handler ! GetUserStancesMessage
-
-      engine.expectMsg(RoomEntity.GetRenderInformation)
-      engine.reply(renderInfo)
-
-      connection.expectMsg(Write(EntityListMessageComposer.compose(
-        Seq((renderInfo.virtualId, renderInfo.reference, renderInfo.position))
-      ) ++ EntityStanceMessageComposer.compose(renderInfo.virtualId, renderInfo.position, renderInfo.stance)))
     }
   }
 
