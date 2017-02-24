@@ -10,6 +10,7 @@ import com.typesafe.config.ConfigFactory
 import de.lightwave.io.tcp.ConnectionHandler.{MessageRead, ReadMessage}
 import de.lightwave.io.tcp.protocol.MessageHeader
 import de.lightwave.players.model.Player
+import de.lightwave.shockwave.handler.MessageHandler.HandleMessage
 import de.lightwave.shockwave.io.ShockwaveConnectionHandler.{GetPlayerInformation, SetPlayerInformation}
 import de.lightwave.shockwave.io.protocol.OperationCode
 import de.lightwave.shockwave.io.protocol.messages.{HelloMessageComposer, PongMessage}
@@ -50,7 +51,7 @@ class ShockwaveConnectionHandlerSpec extends TestKit(ActorSystem("test-system", 
   test("Forward messages to message handler") {
     withActor() { (handler, _, messageHandler) =>
       handler ! MessageRead(MessageHeader(0, OperationCode.Incoming.Pong), ByteString.empty)
-      messageHandler.expectMsg(PongMessage)
+      messageHandler.expectMsg(HandleMessage(PongMessage))
     }
   }
 

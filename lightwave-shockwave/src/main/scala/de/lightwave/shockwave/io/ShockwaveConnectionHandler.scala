@@ -6,6 +6,7 @@ import akka.actor.{ActorRef, Props}
 import de.lightwave.io.tcp.ConnectionHandler
 import de.lightwave.players.model.Player
 import de.lightwave.rooms.model.Rooms.RoomId
+import de.lightwave.shockwave.handler.MessageHandler.HandleMessage
 import de.lightwave.shockwave.handler.RoomHandler
 import de.lightwave.shockwave.io.ShockwaveConnectionHandler.{EnterRoom, GetPlayerInformation, SetPlayerInformation}
 import de.lightwave.shockwave.io.protocol.messages.{HelloMessageComposer, RoomMessage}
@@ -32,7 +33,7 @@ class ShockwaveConnectionHandler(remoteAddress: InetSocketAddress, connection: A
       case Some(handler) => handler ! e
       case None => // Ignore if no room handler set
     }
-    case e => messageHandler ! e
+    case _ => messageHandler ! HandleMessage(msg, playerInformation.isDefined)
   }
 
   override def customReceive: Receive = {
