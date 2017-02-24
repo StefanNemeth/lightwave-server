@@ -4,7 +4,7 @@ import akka.util.ByteString
 import de.lightwave.migration.ShockwaveMigration
 import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance}
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
-import de.lightwave.rooms.engine.mapping.Vector3
+import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.shockwave.io.protocol._
 
 /**
@@ -12,6 +12,7 @@ import de.lightwave.shockwave.io.protocol._
   * because it is already known to the room handler
   */
 trait RoomMessage extends ShockwaveMessage
+trait RoomUserMessage extends RoomMessage
 
 /**
   * Fetches heightmap when loading room
@@ -64,6 +65,18 @@ object GetUserStancesMessageParser extends ShockwaveMessageParser[GetUserStances
   override def parse(reader: ShockwaveMessageReader) = GetUserStancesMessage
 }
 
+/**
+  * Move user in room to specific tile
+  */
+case class MoveUserMessage(pos: Vector2) extends RoomUserMessage
+
+object MoveUserMessageParser extends ShockwaveMessageParser[MoveUserMessage] {
+  val opCode = OperationCode.Incoming.MoveUser
+
+  override def parse(reader: ShockwaveMessageReader) = MoveUserMessage(
+    new Vector2(reader.readShort, reader.readShort)
+  )
+}
 
 /**
   * Send heightmap of room to client

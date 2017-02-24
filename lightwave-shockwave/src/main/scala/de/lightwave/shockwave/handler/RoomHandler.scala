@@ -1,10 +1,11 @@
 package de.lightwave.shockwave.handler
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.io.Tcp.Write
 import akka.util.{ByteString, Timeout}
 import de.lightwave.rooms.engine.RoomEvent
 import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
+import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
 import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
@@ -13,7 +14,7 @@ import de.lightwave.services.pubsub.Broadcaster.Subscribe
 import de.lightwave.shockwave.handler.RoomHandler.SetEntity
 import de.lightwave.shockwave.io.protocol.messages._
 
-class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
+class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor with ActorLogging {
   import context.dispatcher
   import akka.pattern._
   import scala.concurrent.duration._
@@ -30,7 +31,15 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor {
   // Subscribe to room events
   roomEngine ! Subscribe(self)
 
+  def entityReceive(entity: ActorRef): Receive = {
+    case MoveUserMessage(pos) => entity ! TeleportTo(pos)
+  }
+
   def messageReceive: Receive = {
+    case msg:RoomUserMessage => entity match {
+      case Some(e) => entityReceive(e)(msg)
+      case None => log.warning("Room user message cannot be handled without entity")
+    }
     case GetHeightmapMessage => (roomEngine ? GetAbsoluteHeightMap).map {
       case map:IndexedSeq[_] => Write(HeightmapMessageComposer.compose(map.asInstanceOf[StaticMap[Double]]))
     }.recover {

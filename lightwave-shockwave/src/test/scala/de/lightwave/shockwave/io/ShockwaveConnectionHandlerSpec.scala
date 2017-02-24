@@ -51,7 +51,7 @@ class ShockwaveConnectionHandlerSpec extends TestKit(ActorSystem("test-system", 
   test("Forward messages to message handler") {
     withActor() { (handler, _, messageHandler) =>
       handler ! MessageRead(MessageHeader(0, OperationCode.Incoming.Pong), ByteString.empty)
-      messageHandler.expectMsg(HandleMessage(PongMessage))
+      messageHandler.expectMsg(HandleMessage(PongMessage, authenticated = false))
     }
   }
 

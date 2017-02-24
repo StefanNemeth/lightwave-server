@@ -42,5 +42,6 @@ object OperationCode {
     val GetObjects: Short = 62
     val GetItems: Short = 63
     val GetUserStances: Short = 64
+    val MoveUser: Short = 75
   }
 }

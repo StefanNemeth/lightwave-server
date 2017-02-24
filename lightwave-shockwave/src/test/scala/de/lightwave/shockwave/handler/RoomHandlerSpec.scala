@@ -2,13 +2,14 @@ package de.lightwave.shockwave.handler
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.io.Tcp.Write
-import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit, TestProbe}
+import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.migration.ShockwaveMigration
 import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
+import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
 import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
-import de.lightwave.rooms.engine.mapping.Vector3
+import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Subscribe
 import de.lightwave.shockwave.io.protocol.messages.{GetUserStancesMessage, _}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -90,11 +91,21 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
     }
   }
 
-  private def withActor(handleStartup: Boolean = true)(testCode: (ActorRef, TestProbe, TestProbe) => Any) = {
+  test("Move entity to specific position") {
+    withActor() { (handler, connection, engine) =>
+      val entityProbe = TestProbe()
+      handler.underlyingActor.entity = Some(entityProbe.ref)
+
+      handler ! MoveUserMessage(Vector2(1, 1))
+      entityProbe.expectMsg(TeleportTo(Vector2(1, 1)))
+    }
+  }
+
+  private def withActor(handleStartup: Boolean = true)(testCode: (TestActorRef[RoomHandler], TestProbe, TestProbe) => Any) = {
     val connection = TestProbe()
     val roomEngine = TestProbe()
 
-    val handler = system.actorOf(RoomHandler.props(connection.ref, roomEngine.ref))
+    val handler = TestActorRef[RoomHandler](RoomHandler.props(connection.ref, roomEngine.ref))
 
     if (handleStartup) {
       roomEngine.expectMsg(SpawnEntity(EntityReference(1, "Steve")))
