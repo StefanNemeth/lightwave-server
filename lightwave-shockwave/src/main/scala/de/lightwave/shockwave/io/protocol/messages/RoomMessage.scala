@@ -115,8 +115,11 @@ object EntityListMessageComposer extends ShockwaveMessageComposer {
   */
 object EntityStanceMessageComposer extends ShockwaveMessageComposer {
   def compose(virtualId: Int, pos: Vector3, stance: EntityStance): ByteString = init(OperationCode.Outgoing.EntityStance)
-    .push(ByteString.fromString(s"$virtualId ${pos.x},${pos.y},${pos.z},${stance.headDirection},${stance.bodyDirection}//\r"))
-    .toByteString
+    .push(ByteString.fromString(
+      s"$virtualId ${pos.x},${pos.y},${pos.z}," +
+      s"${ShockwaveMigration.convertDirection(stance.headDirection)},${ShockwaveMigration.convertDirection(stance.bodyDirection)}" +
+      s"/${ShockwaveMigration.composeEntityStatuses(stance.properties)}/" + "\r"
+    )).toByteString
 }
 
 /**

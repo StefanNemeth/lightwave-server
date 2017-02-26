@@ -1,5 +1,8 @@
 package de.lightwave.migration
 
+import de.lightwave.rooms.engine.entities.StanceProperty
+import de.lightwave.rooms.engine.entities.StanceProperty.WalkingTo
+import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector3}
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 
 /**
@@ -22,4 +25,12 @@ object ShockwaveMigration {
     }
     mapBuilder.toString
   }
+
+  def convertDirection(direction: RoomDirection): Int = direction match {
+    case RoomDirection.South => 2
+  }
+
+  def composeEntityStatuses(stanceProperties: Seq[StanceProperty]): String = stanceProperties.map {
+    case WalkingTo(Vector3(x, y, z)) => s"mv $x,$y,$z"
+  }.mkString("/")
 }

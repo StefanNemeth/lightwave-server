@@ -5,7 +5,7 @@ import akka.io.Tcp.Write
 import akka.util.{ByteString, Timeout}
 import de.lightwave.rooms.engine.RoomEvent
 import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
-import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
+import de.lightwave.rooms.engine.entities.RoomEntity.{TeleportTo, WalkTo}
 import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
@@ -32,7 +32,7 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor with
   roomEngine ! Subscribe(self)
 
   def entityReceive(entity: ActorRef): Receive = {
-    case MoveUserMessage(pos) => entity ! TeleportTo(pos)
+    case MoveUserMessage(pos) => entity ! WalkTo(pos)
   }
 
   def messageReceive: Receive = {
@@ -57,7 +57,7 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor with
 
   def eventReceive: Receive = {
     case RoomEntity.Spawned(id, reference, _) =>
-      connection ! Write(EntityListMessageComposer.compose(Seq((id, reference, new Vector3(0, 0, 0)))))
+      connection ! Write(EntityListMessageComposer.compose(Seq((id, reference, Vector3.empty))))
     case RoomEntity.PositionUpdated(id, pos, stance) =>
       connection ! Write(EntityStanceMessageComposer.compose(id, pos, stance))
   }

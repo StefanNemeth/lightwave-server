@@ -1,17 +1,16 @@
 package de.lightwave.shockwave.handler
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.io.Tcp.Write
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
-import de.lightwave.migration.ShockwaveMigration
 import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
-import de.lightwave.rooms.engine.entities.RoomEntity.TeleportTo
-import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
+import de.lightwave.rooms.engine.entities.RoomEntity.WalkTo
+import de.lightwave.rooms.engine.entities.{EntityReference, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Subscribe
-import de.lightwave.shockwave.io.protocol.messages.{GetUserStancesMessage, _}
+import de.lightwave.shockwave.io.protocol.messages._
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
 class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.empty))
@@ -47,7 +46,7 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
 
   test("Render all entities") {
     withActor() { (handler, connection, engine) =>
-      val renderInfo = RoomEntity.RenderInformation(1, EntityReference(1, "Steve"), new Vector3(1, 1, 0), EntityStance(2, 2))
+      val renderInfo = RoomEntity.RenderInformation(1, EntityReference(1, "Steve"), new Vector3(1, 1, 0), RoomEntity.DefaultStance)
       handler ! GetUsersMessage
 
       // Placeholder list (required by client)
@@ -86,8 +85,8 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
 
   test("Update entity stance on position update event") {
     withActor() { (handler, connection, _) =>
-      handler ! RoomEntity.PositionUpdated(1, new Vector3(1, 1, 1), EntityStance(2, 2))
-      connection.expectMsg(Write(EntityStanceMessageComposer.compose(1, new Vector3(1, 1, 1), EntityStance(2, 2))))
+      handler ! RoomEntity.PositionUpdated(1, new Vector3(1, 1, 1), RoomEntity.DefaultStance)
+      connection.expectMsg(Write(EntityStanceMessageComposer.compose(1, new Vector3(1, 1, 1), RoomEntity.DefaultStance)))
     }
   }
 
@@ -97,7 +96,7 @@ class RoomHandlerSpec extends TestKit(ActorSystem("test-system", ConfigFactory.e
       handler.underlyingActor.entity = Some(entityProbe.ref)
 
       handler ! MoveUserMessage(Vector2(1, 1))
-      entityProbe.expectMsg(TeleportTo(Vector2(1, 1)))
+      entityProbe.expectMsg(WalkTo(Vector2(1, 1)))
     }
   }
 
