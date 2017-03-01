@@ -3,6 +3,9 @@ package de.lightwave.services
 import akka.actor.{Actor, ActorRef, ActorRefFactory}
 import akka.cluster.routing.{ClusterRouterGroup, ClusterRouterGroupSettings}
 import akka.routing.{FromConfig, RoundRobinGroup}
+import com.typesafe.config.{Config, ConfigFactory}
+
+import scala.io.Source
 
 /**
   * Lightwave makes use of a microservice architecture. Services represent the main components of the server and the project.
@@ -15,6 +18,13 @@ import akka.routing.{FromConfig, RoundRobinGroup}
   * They should always be scalable, extendable, reliable and fault-tolerant.
   */
 trait Service extends Actor
+
+object Service {
+  // Default service configuration file (located at /service.conf)
+  val Config: Config = ConfigFactory.parseString(
+      Source.fromInputStream(getClass.getResourceAsStream("/service.conf")).mkString
+    ).resolve()
+}
 
 object ServiceGroups {
   /**

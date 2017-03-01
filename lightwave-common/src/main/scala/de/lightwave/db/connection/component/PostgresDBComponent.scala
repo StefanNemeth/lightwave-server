@@ -1,6 +1,7 @@
 package de.lightwave.db.connection.component
 
 import de.lightwave.db.connection.DBComponent
+import de.lightwave.services.Service
 
 /**
   * Postgres is used in production environments for storing data such as
@@ -14,5 +15,5 @@ trait PostgresDBComponent extends DBComponent {
 private[component] object PostgresDatabase {
   import slick.driver.PostgresDriver.api._
 
-  val db = Database.forConfig("lightwave.db.postgres")
+  val db = Database.forConfig("lightwave.db.postgres", Service.Config)
 }

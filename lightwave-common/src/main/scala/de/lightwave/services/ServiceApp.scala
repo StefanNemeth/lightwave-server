@@ -7,6 +7,8 @@ import com.typesafe.scalalogging.Logger
 import de.lightwave.dedicated.commands.{DedicatedServerCommandHandler, ThreadedCommandReader}
 
 import scala.collection.JavaConversions._
+import scala.io.Source
+import scala.reflect.io.File
 
 /**
   * Services that can be run independently should extend this trait
@@ -27,7 +29,9 @@ trait ServiceApp {
       "akka.remote.netty.tcp.port" -> servicePort
     )
 
-    val config = ConfigFactory.parseMap(properties).withFallback(ConfigFactory.load())
+    // Load service.conf of local class path
+    val config = ConfigFactory.parseMap(properties).withFallback(Service.Config)
+
     val system = ActorSystem(ServiceApp.SystemName, config)
 
     ServiceApp.Log.info(s"Starting [${config.getStringList("akka.cluster.roles").mkString(",")}] service app..")
