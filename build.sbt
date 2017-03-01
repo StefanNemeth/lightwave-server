@@ -5,44 +5,19 @@ version := Commons.Versions.lightwave
 
 scalaVersion in Global := Commons.Versions.scala
 
-lazy val lightwaveCommon = Project(
-  id = "lightwave-common",
-  base = file("lightwave-common")).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= commonDependencies)
+lazy val common = Commons.module("common")
 
-lazy val lightwavePlayers = Project(
-  id = "lightwave-players",
-  base = file("lightwave-players")).
-  enablePlugins(JavaAppPackaging).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= commonDependencies).
-  dependsOn(lightwaveCommon)
+lazy val players = Commons.service("players", "de.lightwave.players.PlayerServiceApp")
+  .dependsOn(common)
 
-lazy val lightwaveRooms = Project(
-  id = "lightwave-rooms",
-  base = file("lightwave-rooms")).
-  enablePlugins(JavaAppPackaging).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= commonDependencies).
-  settings(
-    mainClass in Compile := Some("de.lightwave.rooms.RoomServiceApp")
-  ).
-  dependsOn(lightwaveCommon)
+lazy val rooms = Commons.service("rooms", "de.lightwave.rooms.RoomServiceApp")
+  .dependsOn(common)
 
-lazy val lightwaveShockwave = Project(
-  id = "lightwave-shockwave",
-  base = file("lightwave-shockwave")).
-  settings(Commons.settings: _*).
-  settings(libraryDependencies ++= commonDependencies).
-  settings(
-    mainClass in Compile := Some("de.lightwave.shockwave.ShockwaveServiceApp")
-  ).
-  dependsOn(lightwaveCommon).
-  dependsOn(lightwaveRooms).
-  dependsOn(lightwavePlayers)
+lazy val shockwave = Commons.service("shockwave", "de.lightwave.shockwave.ShockwaveServiceApp")
+  .dependsOn(common, rooms, players)
 
 val services = Seq(
-  lightwaveRooms,
-  lightwaveShockwave
+  rooms,
+  players,
+  shockwave
 )
