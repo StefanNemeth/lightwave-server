@@ -1,11 +1,11 @@
-package de.lightwave.rooms.engine.entities
+package de.lightwave.rooms.engine.entity
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
-import de.lightwave.rooms.engine.entities.EntityDirector._
-import de.lightwave.rooms.engine.entities.RoomEntity.GetPosition
+import de.lightwave.rooms.engine.entity.EntityDirector._
+import de.lightwave.rooms.engine.entity.RoomEntity.GetPosition
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetDoorPosition
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.rooms.repository.RoomRepositorySpec

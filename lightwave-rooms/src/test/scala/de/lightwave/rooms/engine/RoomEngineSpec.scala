@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
-import de.lightwave.rooms.engine.entities.EntityDirector
+import de.lightwave.rooms.engine.entity.EntityDirector
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.repository.{RoomModelRepositorySpec, RoomRepositorySpec}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}

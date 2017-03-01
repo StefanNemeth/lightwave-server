@@ -1,7 +1,7 @@
 package de.lightwave.migration
 
-import de.lightwave.rooms.engine.entities.StanceProperty
-import de.lightwave.rooms.engine.entities.StanceProperty.WalkingTo
+import de.lightwave.rooms.engine.entity.StanceProperty
+import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
 import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector3}
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 

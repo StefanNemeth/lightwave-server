@@ -2,7 +2,7 @@ package de.lightwave.shockwave.io.protocol.messages
 
 import akka.util.ByteString
 import de.lightwave.migration.ShockwaveMigration
-import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance}
+import de.lightwave.rooms.engine.entity.{EntityReference, EntityStance}
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.shockwave.io.protocol._

@@ -7,8 +7,8 @@ import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.sharding.ShardRegion
 import de.lightwave.rooms.engine.EngineComponent.Initialize
 import de.lightwave.rooms.engine.RoomEngine.{AlreadyInitialized, InitializeRoom, Initialized}
-import de.lightwave.rooms.engine.entities.{EntityDirector, RoomEntity}
-import de.lightwave.rooms.engine.entities.EntityDirector.{GetEntity, SpawnEntity}
+import de.lightwave.rooms.engine.entity.{EntityDirector, RoomEntity}
+import de.lightwave.rooms.engine.entity.EntityDirector.{GetEntity, SpawnEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.model.Room

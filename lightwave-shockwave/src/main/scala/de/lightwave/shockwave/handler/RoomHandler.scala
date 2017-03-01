@@ -4,9 +4,9 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.io.Tcp.Write
 import akka.util.{ByteString, Timeout}
 import de.lightwave.rooms.engine.RoomEvent
-import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
-import de.lightwave.rooms.engine.entities.RoomEntity.{TeleportTo, WalkTo}
-import de.lightwave.rooms.engine.entities.{EntityReference, EntityStance, RoomEntity}
+import de.lightwave.rooms.engine.entity.EntityDirector.SpawnEntity
+import de.lightwave.rooms.engine.entity.RoomEntity.{TeleportTo, WalkTo}
+import de.lightwave.rooms.engine.entity.{EntityReference, EntityStance, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 import de.lightwave.rooms.engine.mapping.Vector3

@@ -4,9 +4,9 @@ import akka.actor.ActorSystem
 import akka.io.Tcp.Write
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
-import de.lightwave.rooms.engine.entities.EntityDirector.SpawnEntity
-import de.lightwave.rooms.engine.entities.RoomEntity.WalkTo
-import de.lightwave.rooms.engine.entities.{EntityReference, RoomEntity}
+import de.lightwave.rooms.engine.entity.EntityDirector.SpawnEntity
+import de.lightwave.rooms.engine.entity.RoomEntity.WalkTo
+import de.lightwave.rooms.engine.entity.{EntityReference, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Subscribe

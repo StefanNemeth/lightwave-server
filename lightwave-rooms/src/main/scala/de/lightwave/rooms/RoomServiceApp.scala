@@ -5,9 +5,6 @@ import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import com.typesafe.config.Config
 import de.lightwave.dedicated.commands.{DedicatedServerCommandContext, DedicatedServerCommandHandler}
 import de.lightwave.rooms.engine.RoomEngine
-import de.lightwave.rooms.engine.RoomEngine.InitializeRoom
-import de.lightwave.rooms.engine.entities.RoomEntity
-import de.lightwave.rooms.model.Room
 import de.lightwave.services.ServiceApp
 
 object DedicatedRoomServiceCommandContext extends DedicatedServerCommandContext {

@@ -1,4 +1,4 @@
-package de.lightwave.rooms.engine.entities
+package de.lightwave.rooms.engine.entity
 
 import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector3}
 

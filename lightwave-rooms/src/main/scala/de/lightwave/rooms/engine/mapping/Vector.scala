@@ -19,6 +19,9 @@ case class Vector2(x: Int = 0, y: Int = 0) {
   def -(that: Vector2) = Vector2(x - that.x, y - that.y)
   def -(that: Vector3) = Vector3(x - that.x, y - that.y)
 
+  def is(v: Vector2): Boolean = x == v.x & y == v.y
+  def is(v: Vector3): Boolean = x == v.x && y == v.y
+
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble).toInt
   override def toString: String = s"$x;$y"
 }
@@ -46,6 +49,9 @@ case class Vector3(x: Int = 0, y: Int = 0, z: Double = 0) {
   def +(that: Vector3) = Vector3(x + that.x, y + that.y, z + that.z)
   def -(that: Vector2) = Vector3(x - that.x, y - that.y, z)
   def -(that: Vector3) = Vector3(x - that.x, y - that.y, z - that.z)
+
+  def is(v: Vector2): Boolean = x == v.x & y == v.y
+  def is(v: Vector3): Boolean = x == v.x && y == v.y && z == v.z
 
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble + z.toDouble * z.toDouble).toInt
   override def toString: String = s"$x;$y;$z"

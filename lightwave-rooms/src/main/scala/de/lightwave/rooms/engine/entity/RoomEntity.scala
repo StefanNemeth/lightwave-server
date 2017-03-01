@@ -1,9 +1,10 @@
-package de.lightwave.rooms.engine.entities
+package de.lightwave.rooms.engine.entity
 
 import akka.actor.Actor.Receive
 import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
-import de.lightwave.rooms.engine.entities.RoomEntity._
+import de.lightwave.rooms.engine.entity.RoomEntity._
+import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetHeight
 import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
@@ -13,11 +14,49 @@ import scala.concurrent.duration._
 case class EntityReference(id: Int, name: String)
 
 /**
-  * Walking functionality of entities
+  * Walking functionality of entities (encapsulating some
+  * vars that are only needed for walking)
   */
 trait EntityWalking { this: RoomEntity =>
+  import context.dispatcher
+
+  private var walkDestination: Option[Vector2] = None
+  private var walking: Boolean = false
+
   protected def walkingReceive: Receive = {
-    case _ =>
+    // Walk only if destination is not already reached
+    case WalkTo(destination) if !destination.is(position) =>
+      walkDestination = Some(destination)
+
+      // Start walking process if not running
+      if (!walking) {
+        walking = true
+
+        val newPos = Vector3(position.x + 1, position.y, 0)
+
+        // Start walking animation
+        self ! SetPosition(position, Some(stance.copy(properties = stance.properties :+ WalkingTo(newPos))))
+        self ! WalkOver(newPos)
+      }
+    case WalkOver(pos) =>
+      context.system.scheduler.scheduleOnce(RoomEntity.WalkingSpeed, self, WalkOn(pos))
+    case WalkOn(newPos) =>
+      // Remove walking stance
+      stance = stance.copy(properties = stance.properties.filter(!_.isInstanceOf[WalkingTo]))
+
+      position = position.copy(x = newPos.x, y = newPos.y)
+      walking = false
+
+      walkDestination match {
+        case Some(destination) if !destination.is(position) => self ! WalkTo(destination)
+        case _ => self ! FinishWalk
+      }
+    case FinishWalk =>
+      // Broadcast last position
+      self ! SetPosition(position)
+
+      walkDestination = None
+      walking = false
   }
 }
 
@@ -57,6 +96,8 @@ object RoomEntity {
     headDirection = RoomDirection.South,
     bodyDirection = RoomDirection.South)
 
+  val WalkingSpeed: FiniteDuration = 500.milliseconds // per tile
+
   /**
     * Get render information of entity including
     * its id, reference and stance
@@ -78,6 +119,29 @@ object RoomEntity {
     * Update position of entity (when in doubt, use TeleportTo message)
     */
   case class SetPosition(pos: Vector3, stance: Option[EntityStance] = None)
+
+  /**
+    * Start walking to specific tile, if already walking
+    * change destination
+    */
+  case class WalkTo(dest: Vector2)
+
+  /**
+    * Walk from one tile to another, that should
+    * already be blocked
+    */
+  case class WalkOver(pos: Vector3)
+
+  /**
+    * Step onto new tile and finally leave old position.
+    * If destination is not reached, continue walking.
+    */
+  case class WalkOn(newPos: Vector3)
+
+  /**
+    * Stop and finish off walk.
+    */
+  case object FinishWalk
 
   /**
     * Response to GetRenderInformation message

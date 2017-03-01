@@ -1,10 +1,10 @@
-package de.lightwave.rooms.engine.entities
+package de.lightwave.rooms.engine.entity
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
-import de.lightwave.rooms.engine.entities.RoomEntity._
-import de.lightwave.rooms.engine.entities.StanceProperty.WalkingTo
+import de.lightwave.rooms.engine.entity.RoomEntity._
+import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetHeight
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
