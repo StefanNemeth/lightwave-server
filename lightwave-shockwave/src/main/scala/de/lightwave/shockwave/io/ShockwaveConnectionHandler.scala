@@ -5,7 +5,6 @@ import java.net.InetSocketAddress
 import akka.actor.{ActorRef, Props}
 import de.lightwave.io.tcp.ConnectionHandler
 import de.lightwave.players.model.Player
-import de.lightwave.rooms.model.Rooms.RoomId
 import de.lightwave.shockwave.handler.MessageHandler.HandleMessage
 import de.lightwave.shockwave.handler.RoomHandler
 import de.lightwave.shockwave.io.ShockwaveConnectionHandler.{EnterRoom, GetPlayerInformation, SetPlayerInformation}

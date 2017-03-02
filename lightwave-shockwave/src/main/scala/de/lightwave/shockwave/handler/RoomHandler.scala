@@ -2,11 +2,10 @@ package de.lightwave.shockwave.handler
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.io.Tcp.Write
-import akka.util.{ByteString, Timeout}
-import de.lightwave.rooms.engine.RoomEvent
+import akka.util.Timeout
 import de.lightwave.rooms.engine.entity.EntityDirector.SpawnEntity
-import de.lightwave.rooms.engine.entity.RoomEntity.{TeleportTo, WalkTo}
-import de.lightwave.rooms.engine.entity.{EntityReference, EntityStance, RoomEntity}
+import de.lightwave.rooms.engine.entity.RoomEntity.WalkTo
+import de.lightwave.rooms.engine.entity.{EntityReference, RoomEntity}
 import de.lightwave.rooms.engine.mapping.MapCoordinator.GetAbsoluteHeightMap
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
 import de.lightwave.rooms.engine.mapping.Vector3
@@ -53,6 +52,8 @@ class RoomHandler(connection: ActorRef, roomEngine: ActorRef) extends Actor with
       connection ! Write(FloorItemsMessageComposer.compose())
     case GetItemsMessage =>
       connection ! Write(WallItemsMessageComposer.compose())
+    // Re-render users to be sure
+    case GetUserStancesMessage => roomEngine ! RoomEntity.GetRenderInformation
   }
 
   def eventReceive: Receive = {

@@ -64,6 +64,9 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
 
     case GetDoorPosition => sender() ! doorPosition
     case GetAbsoluteHeightMap => sender() ! absoluteHeightMap
+
+    case BlockTileTowardsDestination(x, y) =>
+      sender() ! Some(Vector3(x, y, heights.get(x, y).getOrElse(0)))
   }
 }
 
@@ -73,6 +76,7 @@ object MapCoordinator {
   case class SetStateAndHeight(x: Int, y:Int, state: MapUnit, height: Int)
   case object GetDoorPosition
   case object GetAbsoluteHeightMap
+  case class BlockTileTowardsDestination(x: Int, y: Int)
 
   case object InitializedFallback
 
