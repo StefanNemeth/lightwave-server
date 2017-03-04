@@ -44,7 +44,9 @@ class ConnectionHandler(
       case Some(parser) => handleMessage(parser.parse(header, body))
       case None => log.warning(s"Couldn't find parser for message (${header.operationCode}) ${body.utf8String}")
     }
-    case cmd @ Write(_, _) => connection forward cmd
+    case cmd @ Write(str, _) =>
+      log.debug("Sending message to client: " + str.utf8String)
+      connection forward cmd
     case Closed => context stop self
     case _ =>
   }
