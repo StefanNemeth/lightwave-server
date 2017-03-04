@@ -11,6 +11,8 @@ object RoomDirection {
   case object South extends RoomDirection
   case object SouthEast extends RoomDirection
   case object SouthWest extends RoomDirection
+  case object East extends RoomDirection
+  case object West extends RoomDirection
 }
 
 case class Vector2(x: Int = 0, y: Int = 0) {
@@ -21,6 +23,8 @@ case class Vector2(x: Int = 0, y: Int = 0) {
 
   def is(v: Vector2): Boolean = x == v.x & y == v.y
   def is(v: Vector3): Boolean = x == v.x && y == v.y
+
+  def to(d: RoomDirection): Vector2 = Vector2.from(this, d)
 
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble).toInt
   override def toString: String = s"$x;$y"
@@ -42,6 +46,17 @@ object Vector2 {
       case _: NumberFormatException => new Vector2(0, 0)
     }
   }
+
+  def from(from: Vector2, to: RoomDirection): Vector2 = to match {
+    case RoomDirection.South => from + Vector2(1)
+    case RoomDirection.SouthWest => from + Vector2(1, 1)
+    case RoomDirection.SouthEast => from + Vector2(1, -1)
+    case RoomDirection.East => from + Vector2(0, -1)
+    case RoomDirection.West => from + Vector2(0, 1)
+    case RoomDirection.North => from + Vector2(-1)
+    case RoomDirection.NorthWest => from + Vector2(-1, 1)
+    case RoomDirection.NorthEast => from + Vector2(-1, -1)
+  }
 }
 
 case class Vector3(x: Int = 0, y: Int = 0, z: Double = 0) {
@@ -52,6 +67,11 @@ case class Vector3(x: Int = 0, y: Int = 0, z: Double = 0) {
 
   def is(v: Vector2): Boolean = x == v.x & y == v.y
   def is(v: Vector3): Boolean = x == v.x && y == v.y && z == v.z
+
+  def to(d: RoomDirection): Vector3 = {
+    val tmp = Vector2.from(Vector2(x, y), d)
+    Vector3(tmp.x, tmp.y, z)
+  }
 
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble + z.toDouble * z.toDouble).toInt
   override def toString: String = s"$x;$y;$z"
