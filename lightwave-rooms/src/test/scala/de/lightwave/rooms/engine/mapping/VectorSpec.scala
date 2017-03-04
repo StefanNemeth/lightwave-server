@@ -27,4 +27,16 @@ class VectorSpec extends FunSuite {
     assert(Vector2.from("abc") === new Vector2(0, 0))
     assert(Vector3.from("abc") === new Vector3(0, 0, 0))
   }
+
+  test("Get movement direction") {
+    assert(RoomDirection.getMovementDirection(Vector2(1), Vector2(2)).contains(RoomDirection.South))
+    assert(RoomDirection.getMovementDirection(Vector2(2), Vector2(1)).contains(RoomDirection.North))
+    assert(RoomDirection.getMovementDirection(Vector2(0, 1), Vector2(0, 2)).contains(RoomDirection.West))
+    assert(RoomDirection.getMovementDirection(Vector2(0, 2), Vector2(0, 1)).contains(RoomDirection.East))
+    assert(RoomDirection.getMovementDirection(Vector2.empty, Vector2(1, 1)).contains(RoomDirection.SouthWest))
+    assert(RoomDirection.getMovementDirection(Vector2(1, 1), Vector2.empty).contains(RoomDirection.NorthEast))
+    assert(RoomDirection.getMovementDirection(Vector2(1, 3), Vector2(2, 1)).contains(RoomDirection.SouthEast))
+    assert(RoomDirection.getMovementDirection(Vector2(2, 1), Vector2(1, 3)).contains(RoomDirection.NorthWest))
+    assert(RoomDirection.getMovementDirection(Vector2.empty, Vector2.empty).isEmpty)
+  }
 }

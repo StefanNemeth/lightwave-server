@@ -26,12 +26,20 @@ object ShockwaveMigration {
     mapBuilder.toString
   }
 
+  // Formula: Math.abs((a mod 360°) - 360°) / 45°
+  // Use constants to speed it up!
   def convertDirection(direction: RoomDirection): Int = direction match {
     case RoomDirection.South => 2
-    case _ => 0 // TODO: Implement
+    case RoomDirection.SouthWest => 3
+    case RoomDirection.SouthEast => 1
+    case RoomDirection.West => 4
+    case RoomDirection.East => 0
+    case RoomDirection.North => 6
+    case RoomDirection.NorthWest => 5
+    case RoomDirection.NorthEast => 7
   }
 
-  def composeEntityStatuses(stanceProperties: Seq[StanceProperty]): String = stanceProperties.map {
+  def composeEntityStatuses(stanceProperties: Set[StanceProperty]): String = stanceProperties.map {
     case WalkingTo(Vector3(x, y, z)) => s"mv $x,$y,$z"
   }.mkString("/")
 }

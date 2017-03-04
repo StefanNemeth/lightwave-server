@@ -13,6 +13,33 @@ object RoomDirection {
   case object SouthWest extends RoomDirection
   case object East extends RoomDirection
   case object West extends RoomDirection
+
+  /**
+    * @return direction of a movement or nothing if
+    *         there is no movement
+    */
+  def getMovementDirection(from: Vector2, to: Vector2): Option[RoomDirection] = {
+    var dir: Option[RoomDirection] = None
+
+    // Dunno whether it could be done nicer
+    if (from.x < to.x) {
+      dir = Some(South)
+    } else if(from.x > to.x) {
+      dir = Some(North)
+    } else if (from.y > to.y) {
+      return Some(East)
+    } else if (from.y < to.y) {
+      return Some(West)
+    }
+
+    dir.map {
+      case South if from.y > to.y => SouthEast
+      case South if from.y < to.y => SouthWest
+      case North if from.y > to.y => NorthEast
+      case North if from.y < to.y => NorthWest
+      case ignore => ignore
+    }
+  }
 }
 
 case class Vector2(x: Int = 0, y: Int = 0) {
@@ -24,7 +51,7 @@ case class Vector2(x: Int = 0, y: Int = 0) {
   def is(v: Vector2): Boolean = x == v.x & y == v.y
   def is(v: Vector3): Boolean = x == v.x && y == v.y
 
-  def to(d: RoomDirection): Vector2 = Vector2.from(this, d)
+  def +(d: RoomDirection): Vector2 = Vector2.from(this, d)
 
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble).toInt
   override def toString: String = s"$x;$y"
@@ -68,7 +95,7 @@ case class Vector3(x: Int = 0, y: Int = 0, z: Double = 0) {
   def is(v: Vector2): Boolean = x == v.x & y == v.y
   def is(v: Vector3): Boolean = x == v.x && y == v.y && z == v.z
 
-  def to(d: RoomDirection): Vector3 = {
+  def +(d: RoomDirection): Vector3 = {
     val tmp = Vector2.from(Vector2(x, y), d)
     Vector3(tmp.x, tmp.y, z)
   }

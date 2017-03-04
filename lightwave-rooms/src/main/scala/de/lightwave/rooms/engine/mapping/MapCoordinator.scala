@@ -5,6 +5,7 @@ import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
 import de.lightwave.rooms.engine.mapping.MapCoordinator._
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
+import de.lightwave.rooms.engine.mapping.pathfinding.DumbPathfinder
 import de.lightwave.rooms.model.{RoomModel, RoomModels}
 import de.lightwave.rooms.repository.RoomModelRepository
 
@@ -65,8 +66,11 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
     case GetDoorPosition => sender() ! doorPosition
     case GetAbsoluteHeightMap => sender() ! absoluteHeightMap
 
-    case BlockTileTowardsDestination(x, y) =>
-      sender() ! Some(Vector3(x, y, heights.get(x, y).getOrElse(0)))
+    // TODO: Block!
+    case BlockTile(x, y) => sender() ! Some(Vector3(x, y, heights.get(x, y).getOrElse(0)))
+    case BlockTileTowardsDestination(from, to) =>
+      val temp = DumbPathfinder.calculateNextStep(from, to).get
+      sender() ! Some(Vector3(temp.x, temp.y, heights.get(temp.x, temp.y).getOrElse(0)))
   }
 }
 
@@ -76,7 +80,9 @@ object MapCoordinator {
   case class SetStateAndHeight(x: Int, y:Int, state: MapUnit, height: Int)
   case object GetDoorPosition
   case object GetAbsoluteHeightMap
-  case class BlockTileTowardsDestination(x: Int, y: Int)
+  case class BlockTile(x: Int, y: Int)
+  // Find a path to destination and block next step
+  case class BlockTileTowardsDestination(from: Vector2, to: Vector2)
 
   case object InitializedFallback
 

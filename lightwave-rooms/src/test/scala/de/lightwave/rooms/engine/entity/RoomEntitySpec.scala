@@ -5,7 +5,7 @@ import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, Test
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.entity.RoomEntity._
 import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTileTowardsDestination, GetHeight}
+import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, GetHeight}
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -36,7 +36,7 @@ class RoomEntitySpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
     withActor() { (entity, coordinator, _) =>
       entity ! TeleportTo(Vector2(1, 1))
 
-      coordinator.expectMsg(BlockTileTowardsDestination(1, 1))
+      coordinator.expectMsg(BlockTile(1, 1))
       coordinator.reply(Some(new Vector3(1, 1, 2)))
 
       assert(entity.underlyingActor.position == Vector3(1, 1, 2))
@@ -62,18 +62,18 @@ class RoomEntitySpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
   test("Walk to tile") {
     withActor() { (entity, coordinator, broadcaster) =>
       val t0 = System.nanoTime()
-      entity ! WalkTo(new Vector2(1, 0))
+      entity ! WalkTo(Vector2(1))
 
-      coordinator.expectMsg(BlockTileTowardsDestination(1, 0))
-      coordinator.reply(Some(new Vector3(1, 0, 0)))
+      coordinator.expectMsg(BlockTileTowardsDestination(Vector2.empty, Vector2(1)))
+      coordinator.reply(Some(Vector3(1)))
 
       // 1. Start walking animation
-      broadcaster.expectMsg(Publish(PositionUpdated(1, Vector3.empty, RoomEntity.DefaultStance.copy(properties = Seq(
-        WalkingTo(new Vector2(1, 0))
+      broadcaster.expectMsg(Publish(PositionUpdated(1, Vector3.empty, RoomEntity.DefaultStance.copy(properties = Set(
+        WalkingTo(Vector2(1))
       )))))
 
       // 2. End walking animation
-      broadcaster.expectMsg(Publish(PositionUpdated(1, new Vector2(1, 0), RoomEntity.DefaultStance)))
+      broadcaster.expectMsg(Publish(PositionUpdated(1, Vector2(1), RoomEntity.DefaultStance)))
       val t1 = System.nanoTime()
 
       assert((t1 - t0) >= RoomEntity.WalkingSpeed.toNanos)

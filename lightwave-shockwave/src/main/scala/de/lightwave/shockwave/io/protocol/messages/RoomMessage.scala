@@ -111,7 +111,7 @@ object EntityListMessageComposer extends ShockwaveMessageComposer {
 }
 
 /**
-  * Update stance of a specific entity TODO: Add status thing
+  * Update stance of a specific entity
   */
 object EntityStanceMessageComposer extends ShockwaveMessageComposer {
   def compose(virtualId: Int, pos: Vector3, stance: EntityStance): ByteString = init(OperationCode.Outgoing.EntityStance)

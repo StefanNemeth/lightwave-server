@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import de.lightwave.rooms.engine.entity.RoomEntity._
 import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTileTowardsDestination, GetHeight}
+import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, GetHeight}
 import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
 
@@ -20,7 +20,7 @@ trait EntityWalking { this: RoomEntity =>
   private var walking: Boolean = false
 
   private def finishWalk(): Unit = {
-    stance = stance.copy(properties = stance.properties.filter(!_.isInstanceOf[WalkingTo]))
+    stance = stance.copy(properties = stance.properties.without[WalkingTo])
     broadcastPosition()
     walkDestination = None
     walking = false
@@ -30,7 +30,7 @@ trait EntityWalking { this: RoomEntity =>
     walkDestination = Some(destination)
     if (!walking) {
       walking = true
-      (mapCoordinator ? BlockTileTowardsDestination(destination.x, destination.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
+      (mapCoordinator ? BlockTileTowardsDestination(position, destination))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
         case Some(pos) => WalkOver(pos)
         case None => FinishWalk
       }.recover {
@@ -42,7 +42,8 @@ trait EntityWalking { this: RoomEntity =>
   protected def walkingReceive: Receive = {
     case WalkTo(destination) => walkTo(destination)
     case WalkOver(pos) =>
-      stance = stance.copy(properties = stance.properties :+ WalkingTo(pos))
+      val movementDirection = RoomDirection.getMovementDirection(position, pos).getOrElse(stance.bodyDirection)
+      stance = EntityStance(stance.properties.replace(WalkingTo(pos)), movementDirection, movementDirection)
       broadcastPosition()
       context.system.scheduler.scheduleOnce(RoomEntity.WalkingSpeed, self, WalkOn(pos))
     case WalkOn(newPos) =>
@@ -75,7 +76,7 @@ class RoomEntity(id: Int, var reference: EntityReference, val mapCoordinator: Ac
 
   override def receive: Receive = walkingReceive orElse {
     case TeleportTo(pos) =>
-      (mapCoordinator ? BlockTileTowardsDestination(pos.x, pos.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
+      (mapCoordinator ? BlockTile(pos.x, pos.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
         case Some(newPos) => SetPosition(newPos)
         case None => SetPosition(pos)
       }.recover {
@@ -90,11 +91,11 @@ class RoomEntity(id: Int, var reference: EntityReference, val mapCoordinator: Ac
 }
 
 object RoomEntity {
-  val DefaultStance = EntityStance(properties = Seq.empty,
+  val DefaultStance = EntityStance(properties = Set.empty,
     headDirection = RoomDirection.South,
     bodyDirection = RoomDirection.South)
 
-  val WalkingSpeed: FiniteDuration = 500.milliseconds
+  val WalkingSpeed: FiniteDuration = 500.milliseconds - 1.millisecond
 
   case object GetRenderInformation
   case object GetPosition
