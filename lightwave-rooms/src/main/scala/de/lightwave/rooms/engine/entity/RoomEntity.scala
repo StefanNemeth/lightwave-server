@@ -19,18 +19,28 @@ trait EntityWalking { this: RoomEntity =>
   private var walkDestination: Option[Vector2] = None
   private var walking: Boolean = false
 
+  private def finishWalk(): Unit = {
+    stance = stance.copy(properties = stance.properties.filter(!_.isInstanceOf[WalkingTo]))
+    broadcastPosition()
+    walkDestination = None
+    walking = false
+  }
+
+  private def walkTo(destination: Vector2) = if (!destination.is(position)) {
+    walkDestination = Some(destination)
+    if (!walking) {
+      walking = true
+      (mapCoordinator ? BlockTileTowardsDestination(destination.x, destination.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
+        case Some(pos) => WalkOver(pos)
+        case None => FinishWalk
+      }.recover {
+        case _ => FinishWalk
+      } pipeTo self
+    }
+  }
+
   protected def walkingReceive: Receive = {
-    case WalkTo(destination) if !destination.is(position) =>
-      walkDestination = Some(destination)
-      if (!walking) {
-        walking = true
-        (mapCoordinator ? BlockTileTowardsDestination(destination.x, destination.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
-          case Some(pos) => WalkOver(pos)
-          case None => FinishWalk
-        }.recover {
-          case _ => FinishWalk
-        } pipeTo self
-      }
+    case WalkTo(destination) => walkTo(destination)
     case WalkOver(pos) =>
       stance = stance.copy(properties = stance.properties :+ WalkingTo(pos))
       broadcastPosition()
@@ -38,15 +48,11 @@ trait EntityWalking { this: RoomEntity =>
     case WalkOn(newPos) =>
       position = newPos
       walking = false
-      self ! (walkDestination match {
-        case Some(destination) if !destination.is(position) => WalkTo(destination)
-        case _ => FinishWalk
-      })
-    case FinishWalk =>
-      stance = stance.copy(properties = stance.properties.filter(!_.isInstanceOf[WalkingTo]))
-      broadcastPosition()
-      walkDestination = None
-      walking = false
+      walkDestination match {
+        case Some(destination) if !destination.is(position) => walkTo(destination)
+        case _ => finishWalk()
+      }
+    case FinishWalk => finishWalk()
   }
 }
 

@@ -28,6 +28,7 @@ object ShockwaveMigration {
 
   def convertDirection(direction: RoomDirection): Int = direction match {
     case RoomDirection.South => 2
+    case _ => 0 // TODO: Implement
   }
 
   def composeEntityStatuses(stanceProperties: Seq[StanceProperty]): String = stanceProperties.map {

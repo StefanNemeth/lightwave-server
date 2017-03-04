@@ -18,7 +18,7 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
   var heights = new RoomMap[Double](0, 0)
   var states  = new RoomMap[MapUnit](0, 0)
 
-  // Let's call them pseudo-cache
+  // Let's call it pseudo-cache
   var doorPosition = new Vector2(0, 0)
   var absoluteHeightMap: StaticMap[Double] = IndexedSeq[IndexedSeq[Option[Double]]]()
 
