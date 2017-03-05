@@ -53,6 +53,14 @@ case class Vector2(x: Int = 0, y: Int = 0) {
 
   def +(d: RoomDirection): Vector2 = Vector2.from(this, d)
 
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case v:Vector2 => this.x == v.x && this.y == v.y
+    case v:Vector3 => this.x == v.x && this.y == v.y
+    case _ => false
+  }
+
+  override def hashCode(): Int = 41 * (41 + x) + y
+
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble).toInt
   override def toString: String = s"$x;$y"
 }
@@ -99,6 +107,14 @@ case class Vector3(x: Int = 0, y: Int = 0, z: Double = 0) {
     val tmp = Vector2.from(Vector2(x, y), d)
     Vector3(tmp.x, tmp.y, z)
   }
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case v:Vector2 => this.x == v.x && this.y == v.y
+    case v:Vector3 => this.x == v.x && this.y == v.y
+    case _ => false
+  }
+
+  override def hashCode(): Int = 41 * (41 + x) + (42 + y) + z.toInt
 
   def length: Int = sqrt(x.toDouble * x.toDouble + y.toDouble * y.toDouble + z.toDouble * z.toDouble).toInt
   override def toString: String = s"$x;$y;$z"

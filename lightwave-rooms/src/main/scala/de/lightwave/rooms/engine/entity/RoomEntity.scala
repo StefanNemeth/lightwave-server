@@ -46,9 +46,10 @@ trait EntityWalking { this: RoomEntity =>
       stance = EntityStance(stance.properties.replace(WalkingTo(pos)), movementDirection, movementDirection)
       broadcastPosition()
       context.system.scheduler.scheduleOnce(RoomEntity.WalkingSpeed, self, WalkOn(pos))
-    case WalkOn(newPos) =>
+    case WalkOn(newPosition) =>
+      // Clear old position
       mapCoordinator ! ClearTile(position.x, position.y)
-      position = newPos
+      position = newPosition
       walking = false
       walkDestination match {
         case Some(destination) if !destination.is(position) => walkTo(destination)

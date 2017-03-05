@@ -5,7 +5,7 @@ import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
 import de.lightwave.rooms.engine.mapping.MapCoordinator._
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
-import de.lightwave.rooms.engine.mapping.pathfinding.{DumbPathfinder, Pathfinder}
+import de.lightwave.rooms.engine.mapping.pathfinding.{AStarPathfinder, Pathfinder}
 import de.lightwave.rooms.model.{RoomModel, RoomModels}
 import de.lightwave.rooms.repository.RoomModelRepository
 
@@ -96,10 +96,10 @@ class MapCoordinator(modelRepository: RoomModelRepository, pathfinder: Pathfinde
 
     case ClearTile(x, y) => clearTile(x, y)
     case BlockTile(x, y) => blockTile(x, y)
-    case BlockTileTowardsDestination(from, to) => sender() ! (pathfinder.calculateNextStep(from, to) match {
+    case BlockTileTowardsDestination(from, to) => sender() ! (pathfinder.findNextStep(from, to) match {
       case Some(nextStep) =>
         blockTile(nextStep.x, nextStep.y)
-        sender() ! Some(Vector3(nextStep.x, nextStep.y, heights.get(nextStep.x, nextStep.y).getOrElse(0)))
+        Some(Vector3(nextStep.x, nextStep.y, heights.get(nextStep.x, nextStep.y).getOrElse(0)))
       case None => None
     })
   }
@@ -119,5 +119,5 @@ object MapCoordinator {
   case object InitializedFallback
 
   def props(modelRepository: RoomModelRepository, pathfinder: Pathfinder) = Props(classOf[MapCoordinator], modelRepository, pathfinder)
-  def props(): Props = props(RoomModelRepository, DumbPathfinder)
+  def props(): Props = props(RoomModelRepository, AStarPathfinder)
 }
