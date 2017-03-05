@@ -32,8 +32,8 @@ class RoomModelParserSpec extends FunSuite {
   test("Parse valid map string to state map") {
     val map = RoomModelParser.toStateMap(RoomModel(None, "x10", "2;0"))
 
-    assert(map.get(0, 0) === Some(Void))
-    assert(map.get(1, 0) === Some(Tile))
-    assert(map.get(2, 0) === Some(Door))
+    assert(map.get(0, 0) === Some(MapUnit.Void))
+    assert(map.get(1, 0) === Some(MapUnit.Tile.Clear))
+    assert(map.get(2, 0) === Some(MapUnit.Door))
   }
 }

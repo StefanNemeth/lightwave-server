@@ -5,7 +5,7 @@ import akka.testkit.{DefaultTimeout, ImplicitSender, TestActorRef, TestKit, Test
 import com.typesafe.config.ConfigFactory
 import de.lightwave.rooms.engine.entity.RoomEntity._
 import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, GetHeight}
+import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, ClearTile, GetHeight}
 import de.lightwave.rooms.engine.mapping.{Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -36,7 +36,7 @@ class RoomEntitySpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
     withActor() { (entity, coordinator, _) =>
       entity ! TeleportTo(Vector2(1, 1))
 
-      coordinator.expectMsg(BlockTile(1, 1))
+      coordinator.expectMsg(GetHeight(1, 1))
       coordinator.reply(Some(new Vector3(1, 1, 2)))
 
       assert(entity.underlyingActor.position == Vector3(1, 1, 2))
@@ -77,6 +77,9 @@ class RoomEntitySpec extends TestKit(ActorSystem("test-system", ConfigFactory.em
       val t1 = System.nanoTime()
 
       assert((t1 - t0) >= RoomEntity.WalkingSpeed.toNanos)
+
+      // 3. Clear old position
+      coordinator.expectMsg(ClearTile(0, 0))
     }
   }
 

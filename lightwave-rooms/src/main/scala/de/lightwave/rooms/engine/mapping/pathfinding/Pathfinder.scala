@@ -1,9 +1,9 @@
 package de.lightwave.rooms.engine.mapping.pathfinding
 
-import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector2}
+import de.lightwave.rooms.engine.mapping.{MapUnit, RoomDirection, RoomMap, Vector2}
 
 trait Pathfinder {
-  def calculateNextStep(currentPosition: Vector2, destination: Vector2): Option[Vector2]
+  def calculateNextStep(currentPosition: Vector2, destination: Vector2)(implicit states: RoomMap[MapUnit]): Option[Vector2]
 }
 
 /**
@@ -22,7 +22,7 @@ object Pathfinder {
 }
 
 object DumbPathfinder extends Pathfinder {
-  def calculateNextStep(currentPosition: Vector2, destination: Vector2): Option[Vector2] = {
+  def calculateNextStep(currentPosition: Vector2, destination: Vector2)(implicit states: RoomMap[MapUnit]): Option[Vector2] = {
     var x = 0
     var y = 0
 
@@ -38,6 +38,9 @@ object DumbPathfinder extends Pathfinder {
       y = -1
     }
 
-    Some(currentPosition + Vector2(x, y))
+    states.get(x, y) match {
+      case Some(MapUnit.Tile.Clear) => Some(currentPosition + Vector2(x, y))
+      case _ => None
+    }
   }
 }

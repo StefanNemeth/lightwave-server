@@ -5,7 +5,7 @@ import de.lightwave.rooms.engine.EngineComponent
 import de.lightwave.rooms.engine.EngineComponent.{AlreadyInitialized, Initialize, Initialized}
 import de.lightwave.rooms.engine.mapping.MapCoordinator._
 import de.lightwave.rooms.engine.mapping.RoomMap.StaticMap
-import de.lightwave.rooms.engine.mapping.pathfinding.DumbPathfinder
+import de.lightwave.rooms.engine.mapping.pathfinding.{DumbPathfinder, Pathfinder}
 import de.lightwave.rooms.model.{RoomModel, RoomModels}
 import de.lightwave.rooms.repository.RoomModelRepository
 
@@ -13,11 +13,11 @@ import de.lightwave.rooms.repository.RoomModelRepository
   * Represents source of truth regarding all map states
   * and path finding of a room.
   */
-class MapCoordinator(modelRepository: RoomModelRepository) extends EngineComponent with ActorLogging {
+class MapCoordinator(modelRepository: RoomModelRepository, pathfinder: Pathfinder) extends EngineComponent with ActorLogging {
   // Define maps that are responsible for storing heights
   // and states of all tiles
   var heights = new RoomMap[Double](0, 0)
-  var states  = new RoomMap[MapUnit](0, 0)
+  implicit var states  = new RoomMap[MapUnit](0, 0)
 
   // Let's call it pseudo-cache
   var doorPosition = new Vector2(0, 0)
@@ -53,6 +53,34 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
     }
   }
 
+  /**
+    * Block tile so that players can't walk on it
+    * @return true if tile was blocked otherwise false
+    */
+  def blockTile(x: Int, y: Int): Boolean = states.get(x, y) match {
+    case Some(state) => state match {
+      case _:MapUnit.Tile if state != MapUnit.Tile.Blocked =>
+        states.set(x, y)(MapUnit.Tile.Blocked)
+        true
+      case _ => false
+    }
+    case None => false
+  }
+
+  /**
+    * Clear tile so that it's walkable again
+    * @return true if tile was cleared otherwise false
+    */
+  def clearTile(x: Int, y: Int): Boolean = states.get(x, y) match {
+    case Some(state) => state match {
+      case MapUnit.Tile.Blocked =>
+        states.set(x, y)(MapUnit.Tile.Clear)
+        true
+      case _ => false
+    }
+    case None => false
+  }
+
   def initializedReceive: Receive = {
     case Initialize(_) => sender() ! AlreadyInitialized
 
@@ -66,11 +94,14 @@ class MapCoordinator(modelRepository: RoomModelRepository) extends EngineCompone
     case GetDoorPosition => sender() ! doorPosition
     case GetAbsoluteHeightMap => sender() ! absoluteHeightMap
 
-    // TODO: Block!
-    case BlockTile(x, y) => sender() ! Some(Vector3(x, y, heights.get(x, y).getOrElse(0)))
-    case BlockTileTowardsDestination(from, to) =>
-      val temp = DumbPathfinder.calculateNextStep(from, to).get
-      sender() ! Some(Vector3(temp.x, temp.y, heights.get(temp.x, temp.y).getOrElse(0)))
+    case ClearTile(x, y) => clearTile(x, y)
+    case BlockTile(x, y) => blockTile(x, y)
+    case BlockTileTowardsDestination(from, to) => sender() ! (pathfinder.calculateNextStep(from, to) match {
+      case Some(nextStep) =>
+        blockTile(nextStep.x, nextStep.y)
+        sender() ! Some(Vector3(nextStep.x, nextStep.y, heights.get(nextStep.x, nextStep.y).getOrElse(0)))
+      case None => None
+    })
   }
 }
 
@@ -81,11 +112,12 @@ object MapCoordinator {
   case object GetDoorPosition
   case object GetAbsoluteHeightMap
   case class BlockTile(x: Int, y: Int)
+  case class ClearTile(x: Int, y: Int)
   // Find a path to destination and block next step
   case class BlockTileTowardsDestination(from: Vector2, to: Vector2)
 
   case object InitializedFallback
 
-  def props(modelRepository: RoomModelRepository) = Props(classOf[MapCoordinator], modelRepository)
-  def props(): Props = props(RoomModelRepository)
+  def props(modelRepository: RoomModelRepository, pathfinder: Pathfinder) = Props(classOf[MapCoordinator], modelRepository, pathfinder)
+  def props(): Props = props(RoomModelRepository, DumbPathfinder)
 }

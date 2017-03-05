@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.util.Timeout
 import de.lightwave.rooms.engine.entity.RoomEntity._
 import de.lightwave.rooms.engine.entity.StanceProperty.WalkingTo
-import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, GetHeight}
+import de.lightwave.rooms.engine.mapping.MapCoordinator.{BlockTile, BlockTileTowardsDestination, ClearTile, GetHeight}
 import de.lightwave.rooms.engine.mapping.{RoomDirection, Vector2, Vector3}
 import de.lightwave.services.pubsub.Broadcaster.Publish
 
@@ -47,6 +47,7 @@ trait EntityWalking { this: RoomEntity =>
       broadcastPosition()
       context.system.scheduler.scheduleOnce(RoomEntity.WalkingSpeed, self, WalkOn(pos))
     case WalkOn(newPos) =>
+      mapCoordinator ! ClearTile(position.x, position.y)
       position = newPos
       walking = false
       walkDestination match {
@@ -76,7 +77,7 @@ class RoomEntity(id: Int, var reference: EntityReference, val mapCoordinator: Ac
 
   override def receive: Receive = walkingReceive orElse {
     case TeleportTo(pos) =>
-      (mapCoordinator ? BlockTile(pos.x, pos.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
+      (mapCoordinator ? GetHeight(pos.x, pos.y))(Timeout(2.seconds)).mapTo[Option[Vector3]].map {
         case Some(newPos) => SetPosition(newPos)
         case None => SetPosition(pos)
       }.recover {

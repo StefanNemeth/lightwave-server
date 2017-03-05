@@ -30,9 +30,9 @@ object RoomModelParser {
       x <- 0 until map.rows
       y <- 0 until map.cols
     } if (x == doorPosition.x && y == doorPosition.y) {
-      map.set(x, y)(Door)
+      map.set(x, y)(MapUnit.Door)
     } else {
-      map.set(x, y)(if (cols(y)(x).isDigit) Tile else Void)
+      map.set(x, y)(if (cols(y)(x).isDigit) MapUnit.Tile.Clear else MapUnit.Void)
     }
 
     map

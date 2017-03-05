@@ -47,7 +47,7 @@ class RoomMap[T](val rows: Int, val cols: Int) {
 
   def toStatic: StaticMap[T] = underlyingMap.map(x => x.toIndexedSeq).toIndexedSeq
 
-  override def toString: String = s"${rows}x${cols} Room map"
+  override def toString: String = s"${rows}x$cols Room map"
 }
 
 object RoomMap {
@@ -56,6 +56,14 @@ object RoomMap {
 
 sealed trait MapUnit
 
-case object Void extends MapUnit
-case object Tile extends MapUnit
-case object Door extends MapUnit
+object MapUnit {
+  case object Void extends MapUnit
+  case object Door extends MapUnit
+
+  sealed trait Tile extends MapUnit
+
+  object Tile {
+    case object Clear extends Tile
+    case object Blocked extends Tile
+  }
+}
